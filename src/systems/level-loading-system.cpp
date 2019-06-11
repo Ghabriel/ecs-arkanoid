@@ -53,12 +53,16 @@ void createBricks(ecs::ComponentManager& world) {
     using constants::BOARD_BORDER;
 
     constexpr float MAX_X = WINDOW_WIDTH - BOARD_BORDER;
-    for (int x = BOARD_BORDER; x <= MAX_X; x += BRICK_WIDTH) {
-        for (int i = 0; i < 6; i++) {
-            float y = 100 + i * BRICK_HEIGHT;
+    constexpr int BRICKS_PER_ROW = (MAX_X - BOARD_BORDER) / BRICK_WIDTH;
+
+    for (int i = 0; i < BRICKS_PER_ROW; i++) {
+        float x = BOARD_BORDER + i * BRICK_WIDTH + BRICK_WIDTH / 2;
+
+        for (int j = 0; j < 6; j++) {
+            float y = 100 + j * BRICK_HEIGHT + BRICK_HEIGHT / 2;
 
             world.createEntity(
-                Position { static_cast<float>(x), y },
+                Position { x, y },
                 Rectangle { BRICK_WIDTH, BRICK_HEIGHT },
                 Visible { }
             );

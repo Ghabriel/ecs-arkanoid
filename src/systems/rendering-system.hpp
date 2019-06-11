@@ -1,6 +1,7 @@
 #pragma once
 
 #include <SFML/Graphics.hpp>
+#include "../constants.hpp"
 #include "../engine-glue/ecs.hpp"
 
 void useRenderingSystem(ecs::ComponentManager& world, sf::RenderWindow& window) {
@@ -25,11 +26,18 @@ void useRenderingSystem(ecs::ComponentManager& world, sf::RenderWindow& window) 
         .join<Position>()
         .forEach(
             [&window](const Rectangle& rect, const Position& pos) {
-                sf::RectangleShape r({ rect.width, rect.height });
+                using constants::BRICK_BORDER_WIDTH;
+
+                sf::RectangleShape r({
+                    rect.width - 2 * BRICK_BORDER_WIDTH,
+                    rect.height - 2 * BRICK_BORDER_WIDTH
+                });
                 r.setFillColor(sf::Color::White);
+                r.setOutlineColor(sf::Color::Blue);
+                r.setOutlineThickness(BRICK_BORDER_WIDTH);
                 r.setPosition({
-                    pos.x - rect.width / 2,
-                    pos.y - rect.height / 2
+                    pos.x + BRICK_BORDER_WIDTH - rect.width / 2,
+                    pos.y + BRICK_BORDER_WIDTH - rect.height / 2
                 });
 
                 window.draw(r);
