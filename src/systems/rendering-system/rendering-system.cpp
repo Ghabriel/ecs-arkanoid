@@ -1,6 +1,6 @@
 #include "rendering-system.hpp"
 
-#include "../constants.hpp"
+#include "../../constants.hpp"
 
 void renderCircles(ecs::ComponentManager&, sf::RenderWindow&);
 void renderRectangles(ecs::ComponentManager&, sf::RenderWindow&);

@@ -1,6 +1,6 @@
 #include "level-loading-system.hpp"
 
-#include "../constants.hpp"
+#include "../../constants.hpp"
 
 void createPaddle(ecs::ComponentManager& world);
 void createBall(ecs::ComponentManager& world);
