@@ -24,7 +24,8 @@ void createPaddle(ecs::ComponentManager& world) {
 
     world.createEntity(
         Position { x, y },
-        Rectangle { PADDLE_WIDTH, PADDLE_HEIGHT }
+        Rectangle { PADDLE_WIDTH, PADDLE_HEIGHT },
+        Visible { }
     );
 }
 
@@ -41,7 +42,8 @@ void createBall(ecs::ComponentManager& world) {
 
     world.createEntity(
         Circle { BALL_RADIUS },
-        Position { x, y }
+        Position { x, y },
+        Visible { }
     );
 }
 
@@ -58,7 +60,8 @@ void createBricks(ecs::ComponentManager& world) {
 
             world.createEntity(
                 Position { static_cast<float>(x), y },
-                Rectangle { BRICK_WIDTH, BRICK_HEIGHT }
+                Rectangle { BRICK_WIDTH, BRICK_HEIGHT },
+                Visible { }
             );
         }
     }
