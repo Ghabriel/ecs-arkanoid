@@ -19,7 +19,7 @@ void createPaddle(ecs::ComponentManager& world) {
     using constants::PADDLE_HEIGHT;
     using constants::PADDLE_BORDER_DISTANCE;
 
-    constexpr float x = (WINDOW_WIDTH - PADDLE_WIDTH) / 2;
+    constexpr float x = WINDOW_WIDTH / 2;
     constexpr float y = WINDOW_HEIGHT - PADDLE_BORDER_DISTANCE - PADDLE_HEIGHT / 2;
 
     world.createEntity(
@@ -33,11 +33,10 @@ void createBall(ecs::ComponentManager& world) {
     using constants::WINDOW_WIDTH;
     using constants::WINDOW_HEIGHT;
     using constants::BALL_RADIUS;
-    using constants::PADDLE_WIDTH;
     using constants::PADDLE_HEIGHT;
     using constants::PADDLE_BORDER_DISTANCE;
 
-    constexpr float x = (WINDOW_WIDTH - PADDLE_WIDTH) / 2;
+    constexpr float x = WINDOW_WIDTH / 2;
     constexpr float y = WINDOW_HEIGHT - PADDLE_BORDER_DISTANCE - PADDLE_HEIGHT - BALL_RADIUS;
 
     world.createEntity(
