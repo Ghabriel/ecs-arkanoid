@@ -5,7 +5,7 @@
 int main(int, char**) {
     using constants::WINDOW_WIDTH;
     using constants::WINDOW_HEIGHT;
-    sf::RenderWindow window(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "ECS Pong");
+    sf::RenderWindow window(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "ECS Arkanoid");
     Game game;
     game.init(WINDOW_WIDTH, WINDOW_HEIGHT);
 
