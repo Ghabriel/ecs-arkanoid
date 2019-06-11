@@ -2,6 +2,7 @@
 
 #include "../engine-glue/ecs.hpp"
 #include "../engine/state-management/include.hpp"
+#include "../systems/level-loading-system.hpp"
 #include "../systems/rendering-system.hpp"
 
 class WaitingState : public state::State {
@@ -10,6 +11,10 @@ class WaitingState : public state::State {
         ecs::ComponentManager& world,
         state::StateMachine& stateMachine
     ) : world(world), stateMachine(stateMachine) { }
+
+    virtual void onEnter() override {
+        useLevelLoadingSystem(world);
+    }
 
     virtual void update(const sf::Time& elapsedTime) override {
         // if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space)) {
