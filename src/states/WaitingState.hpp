@@ -2,8 +2,8 @@
 
 #include "../engine-glue/ecs.hpp"
 #include "../engine/state-management/include.hpp"
-#include "../systems/level-loading-system/level-loading-system.hpp"
-#include "../systems/rendering-system/rendering-system.hpp"
+#include "../systems/level-loading-system/include.hpp"
+#include "../systems/rendering-system/include.hpp"
 
 class WaitingState : public state::State {
  public:
