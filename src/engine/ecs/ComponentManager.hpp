@@ -35,6 +35,12 @@ namespace ecs {
         void removeComponent(Entity);
 
         /**
+         * Adds a given T component to an entity, or swaps it if already present.
+         */
+        template<typename T>
+        void replaceComponent(Entity, T&&);
+
+        /**
          * Checks if an entity has a T component.
          */
         template<typename T>
@@ -132,6 +138,15 @@ namespace ecs {
     template<typename T>
     inline void GenericComponentManager<ECS>::removeComponent(Entity entity) {
         entityData<T>(storage).erase(entity);
+    }
+
+    template<typename ECS>
+    template<typename T>
+    inline void GenericComponentManager<ECS>::replaceComponent(Entity entity, T&& data) {
+        entityData<std::decay_t<T>>(storage).insert_or_assign(
+            entity,
+            std::forward<T>(data)
+        );
     }
 
     template<typename ECS>

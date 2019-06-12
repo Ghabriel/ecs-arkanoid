@@ -10,6 +10,7 @@ namespace constants {
     constexpr float PADDLE_WIDTH = 150;
     constexpr float PADDLE_HEIGHT = 20;
     constexpr float PADDLE_BORDER_DISTANCE = 20;
+    constexpr float PADDLE_VELOCITY = 300;
 
     constexpr float BRICK_WIDTH = 55;
     constexpr float BRICK_HEIGHT = 20;

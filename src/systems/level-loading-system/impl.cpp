@@ -23,6 +23,7 @@ void createPaddle(ecs::ComponentManager& world) {
     constexpr float y = WINDOW_HEIGHT - PADDLE_BORDER_DISTANCE - PADDLE_HEIGHT / 2;
 
     world.createEntity(
+        Input { },
         Paddle { },
         Position { x, y },
         Rectangle { PADDLE_WIDTH, PADDLE_HEIGHT },

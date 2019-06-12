@@ -2,6 +2,7 @@
 
 #include "../components/Ball.hpp"
 #include "../components/Circle.hpp"
+#include "../components/Input.hpp"
 #include "../components/Paddle.hpp"
 #include "../components/Position.hpp"
 #include "../components/Rectangle.hpp"
@@ -13,6 +14,7 @@ namespace ecs {
     using ECS = GenericECS<
         Ball,
         Circle,
+        Input,
         Paddle,
         Position,
         Rectangle,
