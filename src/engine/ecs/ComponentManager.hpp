@@ -90,6 +90,13 @@ namespace ecs {
         void notify(Args&&...);
 
         /**
+         * Given a component for which there is only one entity, returns the
+         * corresponding entity ID.
+         */
+        template<typename T>
+        Entity unique();
+
+        /**
          * Allows more "functional-style" queries. Returns a `DataQuery` that
          * filters all entities with a T component.
          */
@@ -166,6 +173,14 @@ namespace ecs {
         mutatingQuery<T>([&](Entity, T& listener) {
             listener.fn(std::forward<Args>(args)...);
         });
+    }
+
+    template<typename ECS>
+    template<typename T>
+    inline Entity GenericComponentManager<ECS>::unique() {
+        Entity result = 0;
+        query<T>([&result](Entity id, const T&) { result = id; });
+        return result;
     }
 
     template<typename ECS>

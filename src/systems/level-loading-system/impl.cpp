@@ -23,6 +23,7 @@ void createPaddle(ecs::ComponentManager& world) {
     constexpr float y = WINDOW_HEIGHT - PADDLE_BORDER_DISTANCE - PADDLE_HEIGHT / 2;
 
     world.createEntity(
+        Paddle { },
         Position { x, y },
         Rectangle { PADDLE_WIDTH, PADDLE_HEIGHT },
         Visible { }
@@ -40,6 +41,7 @@ void createBall(ecs::ComponentManager& world) {
     constexpr float y = WINDOW_HEIGHT - PADDLE_BORDER_DISTANCE - PADDLE_HEIGHT - BALL_RADIUS;
 
     world.createEntity(
+        Ball { },
         Circle { BALL_RADIUS },
         Position { x, y },
         Visible { }

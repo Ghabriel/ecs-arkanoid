@@ -2,24 +2,26 @@
 
 #include "../engine-glue/ecs.hpp"
 #include "../engine/state-management/include.hpp"
-#include "../systems/level-loading-system/include.hpp"
+#include "../systems/launching-system/include.hpp"
+#include "../systems/movement-system/include.hpp"
 #include "../systems/rendering-system/include.hpp"
 
-class WaitingState : public state::State {
+class RunningState : public state::State {
  public:
-    WaitingState(
+    RunningState(
         ecs::ComponentManager& world,
         state::StateMachine& stateMachine
     ) : world(world), stateMachine(stateMachine) { }
 
     virtual void onEnter() override {
-        useLevelLoadingSystem(world);
+        useLaunchingSystem(world);
     }
 
     virtual void update(const sf::Time& elapsedTime) override {
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space)) {
-            stateMachine.pushState("running");
-        }
+        unsigned elapsedTimeMicro = elapsedTime.asMicroseconds();
+        float normalizedElapsedTime = elapsedTimeMicro / 1000000.0;
+
+        useMovementSystem(world, normalizedElapsedTime);
     }
 
     virtual void render(sf::RenderWindow& window) override {

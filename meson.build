@@ -5,7 +5,9 @@ sfml_window = dependency('sfml-window')
 sfml_system = dependency('sfml-system')
 
 src = [
+	'src/systems/launching-system/impl.cpp',
 	'src/systems/level-loading-system/impl.cpp',
+	'src/systems/movement-system/impl.cpp',
 	'src/systems/rendering-system/impl.cpp',
 	'src/main.cpp',
 ]
