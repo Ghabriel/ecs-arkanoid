@@ -17,13 +17,14 @@ class WaitingState : public state::State {
     virtual void onEnter() override {
         useLevelLoadingSystem(world);
 
-        ecs::Entity ball = world.unique<Ball>();
-        world.addComponent<Input>(ball, { });
-    }
+        useEffect([this] {
+            ecs::Entity ball = world.unique<Ball>();
+            world.addComponent<Input>(ball, { });
 
-    virtual void onExit() override {
-        ecs::Entity ball = world.unique<Ball>();
-        world.removeComponent<Input>(ball);
+            return [this, ball] {
+                world.removeComponent<Input>(ball);
+            };
+        });
     }
 
     virtual void update(const sf::Time& elapsedTime) override {
