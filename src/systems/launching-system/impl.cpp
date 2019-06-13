@@ -15,7 +15,7 @@ void useLaunchingSystem(ecs::ComponentManager& world) {
 
             using constants::BALL_VELOCITY;
 
-            world.addComponent(ballId, Velocity {
+            world.replaceComponent(ballId, Velocity {
                 BALL_VELOCITY * std::cos(angle),
                 BALL_VELOCITY * std::sin(angle)
             });
