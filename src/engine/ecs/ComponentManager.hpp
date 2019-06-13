@@ -103,11 +103,11 @@ namespace ecs {
         Entity unique();
 
         /**
-         * Allows more "functional-style" queries. Returns a `DataQuery` that
+         * Allows more "functional-style" queries. Returns a `GenericDataQuery` that
          * filters all entities with a T component.
          */
         template<typename T>
-        DataQuery<ECS, T> findAll();
+        GenericDataQuery<ECS, T> findAll();
 
      private:
         ECS storage;
@@ -200,8 +200,8 @@ namespace ecs {
 
     template<typename ECS>
     template<typename T>
-    inline DataQuery<ECS, T> GenericComponentManager<ECS>::findAll() {
-        return DataQuery<ECS, T>(storage);
+    inline GenericDataQuery<ECS, T> GenericComponentManager<ECS>::findAll() {
+        return GenericDataQuery<ECS, T>(storage);
     }
 
     template<typename ECS>

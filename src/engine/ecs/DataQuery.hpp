@@ -19,20 +19,20 @@ namespace ecs {
     }
 
     template<typename ECS, typename T, typename... Ts>
-    class DataQuery {
+    class GenericDataQuery {
     public:
-        explicit DataQuery(ECS& storage) : storage(storage) { }
+        explicit GenericDataQuery(ECS& storage) : storage(storage) { }
 
         /**
-         * Returns a `DataQuery` with an additional `U` filter.
+         * Returns a `GenericDataQuery` with an additional `U` filter.
          */
         template<typename U>
-        DataQuery<ECS, T, Ts..., U> join() {
-            return DataQuery<ECS, T, Ts..., U>(storage);
+        GenericDataQuery<ECS, T, Ts..., U> join() {
+            return GenericDataQuery<ECS, T, Ts..., U>(storage);
         }
 
         /**
-         * Iterates over all entities that match this `DataQuery` filters,
+         * Iterates over all entities that match this `GenericDataQuery` filters,
          * executing a callback for each of them.
          *
          * The callback itself dictates which data is passed to it. Its

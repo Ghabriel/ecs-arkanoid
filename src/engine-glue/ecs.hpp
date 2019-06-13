@@ -23,4 +23,7 @@ namespace ecs {
     >;
 
     using ComponentManager = GenericComponentManager<ECS>;
+
+    template<typename T, typename... Ts>
+    using DataQuery = GenericDataQuery<ECS, T, Ts...>;
 }
