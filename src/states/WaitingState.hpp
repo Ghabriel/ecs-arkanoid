@@ -19,7 +19,7 @@ class WaitingState : public state::State {
 
         useEffect([this] {
             ecs::Entity ball = world.unique<Ball>();
-            world.addComponent<Input>(ball, { });
+            world.addComponent(ball, Input { });
 
             return [this, ball] {
                 world.removeComponent<Input>(ball);
