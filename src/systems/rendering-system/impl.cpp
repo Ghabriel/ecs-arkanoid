@@ -2,8 +2,8 @@
 
 #include "../../constants.hpp"
 
-void renderCircles(ecs::ComponentManager&, sf::RenderWindow&);
-void renderRectangles(ecs::ComponentManager&, sf::RenderWindow&);
+static void renderCircles(ecs::ComponentManager&, sf::RenderWindow&);
+static void renderRectangles(ecs::ComponentManager&, sf::RenderWindow&);
 
 void useRenderingSystem(ecs::ComponentManager& world, sf::RenderWindow& window) {
     renderCircles(world, window);

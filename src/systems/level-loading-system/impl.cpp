@@ -2,9 +2,9 @@
 
 #include "../../constants.hpp"
 
-void createPaddle(ecs::ComponentManager& world);
-void createBall(ecs::ComponentManager& world);
-void createBricks(ecs::ComponentManager& world);
+static void createPaddle(ecs::ComponentManager& world);
+static void createBall(ecs::ComponentManager& world);
+static void createBricks(ecs::ComponentManager& world);
 
 void useLevelLoadingSystem(ecs::ComponentManager& world) {
     createPaddle(world);

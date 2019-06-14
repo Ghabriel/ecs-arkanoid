@@ -13,8 +13,8 @@ struct RectangleData {
     const Position& position;
 };
 
-void resolveCollisions(ecs::ComponentManager&, float);
-bool collides(const CircleData&, const RectangleData&);
+static void resolveCollisions(ecs::ComponentManager&, float);
+static bool collides(const CircleData&, const RectangleData&);
 
 void useMovementSystem(ecs::ComponentManager& world, float elapsedTime) {
     resolveCollisions(world, elapsedTime);
