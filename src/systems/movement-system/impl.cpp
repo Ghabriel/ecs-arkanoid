@@ -38,6 +38,8 @@ void resolveCollisions(ecs::ComponentManager& world, float elapsedTime) {
             Velocity velocity { v.x * elapsedTime, v.y * elapsedTime };
             Position nextPositionX { ballPos.x + velocity.x, ballPos.y };
             Position nextPositionY { ballPos.x, ballPos.y + velocity.y };
+            bool changedDirectionX = false;
+            bool changedDirectionY = false;
 
             world.findAll<Rectangle>()
                 .join<Position>()
@@ -46,13 +48,21 @@ void resolveCollisions(ecs::ComponentManager& world, float elapsedTime) {
                     bool willCollide = false;
 
                     if (collides(CircleData { c, nextPositionX }, rectangle)) {
-                        v.x *= -1;
                         willCollide = true;
+
+                        if (!changedDirectionX) {
+                            v.x *= -1;
+                            changedDirectionX = true;
+                        }
                     }
 
                     if (collides(CircleData { c, nextPositionY }, rectangle)) {
-                        v.y *= -1;
                         willCollide = true;
+
+                        if (!changedDirectionY) {
+                            v.y *= -1;
+                            changedDirectionY = true;
+                        }
                     }
 
                     if (willCollide) {
