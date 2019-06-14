@@ -2,6 +2,7 @@
 
 #include "../engine-glue/ecs.hpp"
 #include "../engine/state-management/include.hpp"
+#include "../systems/collision-handler-system/include.hpp"
 #include "../systems/input-system/include.hpp"
 #include "../systems/launching-system/include.hpp"
 #include "../systems/movement-system/include.hpp"
@@ -12,10 +13,24 @@ class RunningState : public state::State {
     RunningState(
         ecs::ComponentManager& world,
         state::StateMachine& stateMachine
-    ) : world(world), stateMachine(stateMachine) { }
+    ) : world(world), stateMachine(stateMachine) {
+        collisionListenerId = world.createEntity();
+    }
 
     virtual void onEnter() override {
         useLaunchingSystem(world);
+
+        useEffect([this] {
+            auto callback = [this](ecs::Entity id) {
+                useCollisionHandlerSystem(world, id);
+            };
+
+            world.addComponent(collisionListenerId, BallCollisionListener { callback });
+
+            return [this] {
+                world.removeComponent<BallCollisionListener>(collisionListenerId);
+            };
+        });
     }
 
     virtual void update(const sf::Time& elapsedTime) override {
@@ -33,4 +48,5 @@ class RunningState : public state::State {
  private:
     ecs::ComponentManager& world;
     state::StateMachine& stateMachine;
+    ecs::Entity collisionListenerId;
 };

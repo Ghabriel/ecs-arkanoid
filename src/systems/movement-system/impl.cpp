@@ -3,8 +3,6 @@
 #include <algorithm>
 #include "../../constants.hpp"
 
-#include <iostream>
-
 struct CircleData {
     const Circle& body;
     const Position& position;
@@ -43,15 +41,22 @@ void resolveCollisions(ecs::ComponentManager& world, float elapsedTime) {
 
             world.findAll<Rectangle>()
                 .join<Position>()
-                .forEach([&](const Rectangle& r, const Position& rectPos) {
+                .forEach([&](ecs::Entity id, const Rectangle& r, const Position& rectPos) {
                     RectangleData rectangle { r, rectPos };
+                    bool willCollide = false;
 
                     if (collides(CircleData { c, nextPositionX }, rectangle)) {
                         v.x *= -1;
+                        willCollide = true;
                     }
 
                     if (collides(CircleData { c, nextPositionY }, rectangle)) {
                         v.y *= -1;
+                        willCollide = true;
+                    }
+
+                    if (willCollide) {
+                        world.notify<BallCollisionListener>(id);
                     }
                 });
             }

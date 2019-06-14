@@ -7,13 +7,29 @@
 namespace ecs {
     namespace __detail {
         template<typename T>
+        struct QueryParameter {
+            template<typename ECS>
+            static T& get(ECS& storage, Entity entity) {
+                return entityData<std::decay_t<T>>(storage).at(entity);
+            }
+        };
+
+        template<>
+        struct QueryParameter<Entity> {
+            template<typename ECS>
+            static Entity get(ECS& storage, Entity entity) {
+                return entity;
+            }
+        };
+
+        template<typename T>
         struct Dispatcher;
 
         template<typename... Ts>
         struct Dispatcher<std::tuple<Ts...>> {
             template<typename ECS, typename Functor>
             void operator()(ECS& storage, Functor fn, Entity entity) {
-                fn(entityData<std::decay_t<Ts>>(storage).at(entity)...);
+                fn(QueryParameter<Ts>::get(storage, entity)...);
             }
         };
     }
