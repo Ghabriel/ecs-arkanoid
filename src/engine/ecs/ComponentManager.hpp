@@ -137,7 +137,7 @@ namespace ecs {
             removeComponent<T>(entity);
         };
 
-        meta::ForEachT<typename ECS::ComponentTypes>::exec(fn);
+        meta::forEachT<typename ECS::ComponentTypes>(fn);
     }
 
     template<typename ECS>

@@ -3,14 +3,15 @@
 #include <tuple>
 
 namespace meta {
-    template<typename... Ts>
-    struct ForEachT;
-
-    template<typename... Ts>
-    struct ForEachT<std::tuple<Ts...>> {
-        template<typename F>
-        static void exec(F fn) {
+    namespace __detail {
+        template<typename F, typename... Ts>
+        void forEachT(F fn, std::tuple<Ts...>*) {
             (fn.template operator()<Ts>(), ...);
         }
-    };
+    }
+
+    template<typename Tuple, typename F>
+    void forEachT(F fn) {
+        return __detail::forEachT(fn, static_cast<Tuple*>(nullptr));
+    }
 }
