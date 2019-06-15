@@ -67,6 +67,7 @@ void createBricks(ecs::ComponentManager& world) {
             float y = 100 + j * BRICK_HEIGHT + BRICK_HEIGHT / 2;
 
             world.createEntity(
+                BounceCollision { },
                 Position { x, y },
                 Rectangle { BRICK_WIDTH, BRICK_HEIGHT },
                 Visible { }
@@ -82,6 +83,7 @@ void createWalls(ecs::ComponentManager& world) {
 
     // Top
     world.createEntity(
+        BounceCollision { },
         Position { WINDOW_WIDTH / 2, BOARD_BORDER / 2 },
         Rectangle { WINDOW_WIDTH, BOARD_BORDER },
         Visible { }
@@ -89,6 +91,7 @@ void createWalls(ecs::ComponentManager& world) {
 
     // Left
     world.createEntity(
+        BounceCollision { },
         Position { BOARD_BORDER / 2, WINDOW_HEIGHT / 2 },
         Rectangle { BOARD_BORDER, WINDOW_HEIGHT },
         Visible { }
@@ -96,6 +99,7 @@ void createWalls(ecs::ComponentManager& world) {
 
     // Right
     world.createEntity(
+        BounceCollision { },
         Position { WINDOW_WIDTH - BOARD_BORDER / 2, WINDOW_HEIGHT / 2 },
         Rectangle { BOARD_BORDER, WINDOW_HEIGHT },
         Visible { }
@@ -103,6 +107,7 @@ void createWalls(ecs::ComponentManager& world) {
 
     // Bottom
     world.createEntity(
+        BounceCollision { },
         Position { WINDOW_WIDTH / 2, 0 },
         Rectangle { WINDOW_WIDTH, BOARD_BORDER },
         Visible { }

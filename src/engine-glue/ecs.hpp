@@ -2,6 +2,7 @@
 
 #include "../components/Ball.hpp"
 #include "../components/BallCollisionListener.hpp"
+#include "../components/BounceCollision.hpp"
 #include "../components/Circle.hpp"
 #include "../components/Input.hpp"
 #include "../components/Paddle.hpp"
@@ -15,6 +16,7 @@ namespace ecs {
     using ECS = GenericECS<
         Ball,
         BallCollisionListener,
+        BounceCollision,
         Circle,
         Input,
         Paddle,

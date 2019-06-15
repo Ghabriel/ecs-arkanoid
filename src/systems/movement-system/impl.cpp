@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <bitset>
 #include "../../constants.hpp"
+#include "../../helpers/ball-paddle-contact.hpp"
 
 struct CircleData {
     const Circle& body;
@@ -20,11 +21,20 @@ namespace Axis {
 }
 
 static void resolveCollisions(ecs::ComponentManager&, float);
-static std::bitset<2> resolveRectangleCollisions(
+static void resolvePaddleCollisions(
+    ecs::ComponentManager&,
+    ecs::Entity,
+    const Position&,
+    const CircleData&,
+    const CircleData&,
+    Velocity&
+);
+static void resolveBounceCollisions(
     ecs::ComponentManager&,
     ecs::Entity,
     const CircleData&,
-    const CircleData&
+    const CircleData&,
+    Velocity&
 );
 static bool collides(const CircleData&, const RectangleData&);
 
@@ -58,32 +68,64 @@ void resolveCollisions(ecs::ComponentManager& world, float elapsedTime) {
             CircleData nextCircleDataX { c, nextPositionX };
             CircleData nextCircleDataY { c, nextPositionY };
 
-            std::bitset<2> collisionAxis = resolveRectangleCollisions(
+            resolvePaddleCollisions(
+                world,
+                ballId,
+                ballPos,
+                nextCircleDataX,
+                nextCircleDataY,
+                v
+            );
+
+            resolveBounceCollisions(
                 world,
                 ballId,
                 nextCircleDataX,
-                nextCircleDataY
+                nextCircleDataY,
+                v
             );
+        });
+}
 
-            if (collisionAxis[Axis::X]) {
-                v.x *= -1;
-            }
+void resolvePaddleCollisions(
+    ecs::ComponentManager& world,
+    ecs::Entity ballId,
+    const Position& ballPos,
+    const CircleData& nextCircleDataX,
+    const CircleData& nextCircleDataY,
+    Velocity& ballVelocity
+) {
+    world.findAll<Paddle>()
+        .join<Rectangle>()
+        .join<Position>()
+        .forEach([&](
+            ecs::Entity paddleId,
+            const Rectangle& r,
+            const Position& paddlePos
+        ) {
+            RectangleData rectangle { r, paddlePos };
+            std::bitset<2> willCollide;
+            willCollide.set(Axis::X, collides(nextCircleDataX, rectangle));
+            willCollide.set(Axis::Y, collides(nextCircleDataY, rectangle));
 
-            if (collisionAxis[Axis::Y]) {
-                v.y *= -1;
+            if (willCollide.any()) {
+                ballVelocity = getBallNewVelocity(ballPos, paddlePos);
+                world.notify<BallCollisionListener>(ballId, paddleId);
             }
         });
 }
 
-std::bitset<2> resolveRectangleCollisions(
+void resolveBounceCollisions(
     ecs::ComponentManager& world,
     ecs::Entity ballId,
     const CircleData& nextCircleDataX,
-    const CircleData& nextCircleDataY
+    const CircleData& nextCircleDataY,
+    Velocity& ballVelocity
 ) {
     std::bitset<2> collisionAxis;
 
-    world.findAll<Rectangle>()
+    world.findAll<BounceCollision>()
+        .join<Rectangle>()
         .join<Position>()
         .forEach([&](
             ecs::Entity objectId,
@@ -102,7 +144,13 @@ std::bitset<2> resolveRectangleCollisions(
             }
         });
 
-    return collisionAxis;
+    if (collisionAxis[Axis::X]) {
+        ballVelocity.x *= -1;
+    }
+
+    if (collisionAxis[Axis::Y]) {
+        ballVelocity.y *= -1;
+    }
 }
 
 bool collides(const CircleData& c, const RectangleData& r) {
