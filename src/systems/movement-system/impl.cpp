@@ -43,6 +43,8 @@ void resolveCollisions(ecs::ComponentManager& world, float elapsedTime) {
             Velocity velocity { v.x * elapsedTime, v.y * elapsedTime };
             Position nextPositionX { ballPos.x + velocity.x, ballPos.y };
             Position nextPositionY { ballPos.x, ballPos.y + velocity.y };
+            CircleData nextCircleDataX { c, nextPositionX };
+            CircleData nextCircleDataY { c, nextPositionY };
             bool changedDirectionX = false;
             bool changedDirectionY = false;
 
@@ -54,32 +56,25 @@ void resolveCollisions(ecs::ComponentManager& world, float elapsedTime) {
                     const Position& rectPos
                 ) {
                     RectangleData rectangle { r, rectPos };
-                    bool willCollide = false;
+                    bool willCollideX = collides(nextCircleDataX, rectangle);
+                    bool willCollideY = collides(nextCircleDataY, rectangle);
 
-                    if (collides(CircleData { c, nextPositionX }, rectangle)) {
-                        willCollide = true;
+                    changedDirectionX = changedDirectionX || willCollideX;
+                    changedDirectionY = changedDirectionY || willCollideY;
 
-                        if (!changedDirectionX) {
-                            v.x *= -1;
-                            changedDirectionX = true;
-                        }
-                    }
-
-                    if (collides(CircleData { c, nextPositionY }, rectangle)) {
-                        willCollide = true;
-
-                        if (!changedDirectionY) {
-                            v.y *= -1;
-                            changedDirectionY = true;
-                        }
-                    }
-
-                    if (willCollide) {
+                    if (willCollideX || willCollideY) {
                         world.notify<BallCollisionListener>(ballId, objectId);
                     }
                 });
+
+            if (changedDirectionX) {
+                v.x *= -1;
             }
-        );
+
+            if (changedDirectionY) {
+                v.y *= -1;
+            }
+        });
 }
 
 bool collides(const CircleData& c, const RectangleData& r) {
