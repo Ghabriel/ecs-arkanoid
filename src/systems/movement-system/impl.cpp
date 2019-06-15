@@ -13,7 +13,24 @@ struct RectangleData {
     const Position& position;
 };
 
+struct CollisionAxis {
+    bool x;
+    bool y;
+};
+
+CollisionAxis& operator||(CollisionAxis& lhs, const CollisionAxis& rhs) {
+    lhs.x = lhs.x || rhs.x;
+    lhs.y = lhs.y || rhs.y;
+    return lhs;
+}
+
 static void resolveCollisions(ecs::ComponentManager&, float);
+static CollisionAxis resolveRectangleCollisions(
+    ecs::ComponentManager&,
+    ecs::Entity,
+    const CircleData&,
+    const CircleData&
+);
 static bool collides(const CircleData&, const RectangleData&);
 
 void useMovementSystem(ecs::ComponentManager& world, float elapsedTime) {
@@ -45,36 +62,53 @@ void resolveCollisions(ecs::ComponentManager& world, float elapsedTime) {
             Position nextPositionY { ballPos.x, ballPos.y + velocity.y };
             CircleData nextCircleDataX { c, nextPositionX };
             CircleData nextCircleDataY { c, nextPositionY };
-            bool changedDirectionX = false;
-            bool changedDirectionY = false;
 
-            world.findAll<Rectangle>()
-                .join<Position>()
-                .forEach([&](
-                    ecs::Entity objectId,
-                    const Rectangle& r,
-                    const Position& rectPos
-                ) {
-                    RectangleData rectangle { r, rectPos };
-                    bool willCollideX = collides(nextCircleDataX, rectangle);
-                    bool willCollideY = collides(nextCircleDataY, rectangle);
+            CollisionAxis collisionAxis = resolveRectangleCollisions(
+                world,
+                ballId,
+                nextCircleDataX,
+                nextCircleDataY
+            );
 
-                    changedDirectionX = changedDirectionX || willCollideX;
-                    changedDirectionY = changedDirectionY || willCollideY;
-
-                    if (willCollideX || willCollideY) {
-                        world.notify<BallCollisionListener>(ballId, objectId);
-                    }
-                });
-
-            if (changedDirectionX) {
+            if (collisionAxis.x) {
                 v.x *= -1;
             }
 
-            if (changedDirectionY) {
+            if (collisionAxis.y) {
                 v.y *= -1;
             }
         });
+}
+
+CollisionAxis resolveRectangleCollisions(
+    ecs::ComponentManager& world,
+    ecs::Entity ballId,
+    const CircleData& nextCircleDataX,
+    const CircleData& nextCircleDataY
+) {
+    CollisionAxis collisionAxis { false, false };
+
+    world.findAll<Rectangle>()
+        .join<Position>()
+        .forEach([&](
+            ecs::Entity objectId,
+            const Rectangle& r,
+            const Position& rectPos
+        ) {
+            RectangleData rectangle { r, rectPos };
+            CollisionAxis willCollide {
+                collides(nextCircleDataX, rectangle),
+                collides(nextCircleDataY, rectangle)
+            };
+
+            collisionAxis = collisionAxis || willCollide;
+
+            if (willCollide.x || willCollide.y) {
+                world.notify<BallCollisionListener>(ballId, objectId);
+            }
+        });
+
+    return collisionAxis;
 }
 
 bool collides(const CircleData& c, const RectangleData& r) {
