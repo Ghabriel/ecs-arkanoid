@@ -127,7 +127,7 @@ void resolveBounceCollisions(
     world.findAll<BounceCollision>()
         .join<Rectangle>()
         .join<Position>()
-        .forEach([&](
+        .mutatingForEach([&](
             ecs::Entity objectId,
             const Rectangle& r,
             const Position& rectPos

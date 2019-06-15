@@ -6,6 +6,7 @@
 #include <iostream>
 
 static void handlePaddleCollision(ecs::ComponentManager&, ecs::Entity, ecs::Entity);
+static void handleBrickCollision(ecs::ComponentManager&, ecs::Entity, ecs::Entity);
 
 void useCollisionHandlerSystem(
     ecs::ComponentManager& world,
@@ -17,7 +18,12 @@ void useCollisionHandlerSystem(
         return;
     }
 
-    std::cout << "Collision detected with " << objectId << '\n';
+    if (world.hasComponent<Brick>(objectId)) {
+        handleBrickCollision(world, ballId, objectId);
+        return;
+    }
+
+    std::cout << "Collision detected with wall " << objectId << '\n';
 }
 
 void handlePaddleCollision(
@@ -26,4 +32,13 @@ void handlePaddleCollision(
     ecs::Entity paddleId
 ) {
     std::cout << "Collision detected with Paddle\n";
+}
+
+void handleBrickCollision(
+    ecs::ComponentManager& world,
+    ecs::Entity ballId,
+    ecs::Entity brickId
+) {
+    std::cout << "Collision detected with brick " << brickId << '\n';
+    world.deleteEntity(brickId);
 }

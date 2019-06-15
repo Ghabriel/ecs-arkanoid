@@ -4,6 +4,19 @@
 #include "ECS.hpp"
 
 namespace ecs {
+    namespace __detail {
+        template<typename... Ts>
+        struct ForEachT;
+
+        template<typename... Ts>
+        struct ForEachT<std::tuple<Ts...>> {
+            template<typename F>
+            static void exec(F fn) {
+                (fn.template operator()<Ts>(), ...);
+            }
+        };
+    }
+
     /**
      * Manages the game entities and their components.
      *
@@ -21,6 +34,11 @@ namespace ecs {
          */
         template<typename... Ts>
         Entity createEntity(Ts&&...);
+
+        /**
+         * Deletes an entity, including all its data.
+         */
+        void deleteEntity(Entity);
 
         /**
          * Adds a given T component to an entity.
@@ -123,6 +141,15 @@ namespace ecs {
         Entity id = storage.nextEntityId++;
         (addComponent<Ts>(id, std::forward<Ts>(data)), ...);
         return id;
+    }
+
+    template<typename ECS>
+    inline void GenericComponentManager<ECS>::deleteEntity(Entity entity) {
+        auto fn = [this, entity]<typename T>() {
+            removeComponent<T>(entity);
+        };
+
+        __detail::ForEachT<typename ECS::ComponentTypes>::exec(fn);
     }
 
     template<typename ECS>

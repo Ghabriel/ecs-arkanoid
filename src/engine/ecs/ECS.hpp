@@ -1,5 +1,6 @@
 #pragma once
 
+#include <tuple>
 #include <unordered_map>
 
 namespace ecs {
@@ -18,6 +19,7 @@ namespace ecs {
 
     template<typename... Ts>
     struct GenericECS : __detail::FieldContainer<Ts>... {
+        using ComponentTypes = std::tuple<Ts...>;
         Entity nextEntityId = 0;
     };
 

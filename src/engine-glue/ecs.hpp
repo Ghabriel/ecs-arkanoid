@@ -3,6 +3,7 @@
 #include "../components/Ball.hpp"
 #include "../components/BallCollisionListener.hpp"
 #include "../components/BounceCollision.hpp"
+#include "../components/Brick.hpp"
 #include "../components/Circle.hpp"
 #include "../components/Input.hpp"
 #include "../components/Paddle.hpp"
@@ -17,6 +18,7 @@ namespace ecs {
         Ball,
         BallCollisionListener,
         BounceCollision,
+        Brick,
         Circle,
         Input,
         Paddle,

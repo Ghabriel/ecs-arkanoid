@@ -68,6 +68,7 @@ void createBricks(ecs::ComponentManager& world) {
 
             world.createEntity(
                 BounceCollision { },
+                Brick { },
                 Position { x, y },
                 Rectangle { BRICK_WIDTH, BRICK_HEIGHT },
                 Visible { }
