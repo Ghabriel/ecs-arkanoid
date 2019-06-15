@@ -21,8 +21,8 @@ class RunningState : public state::State {
         useLaunchingSystem(world);
 
         useEffect([this] {
-            auto callback = [this](ecs::Entity id) {
-                useCollisionHandlerSystem(world, id);
+            auto callback = [this](ecs::Entity ballId, ecs::Entity objectId) {
+                useCollisionHandlerSystem(world, ballId, objectId);
             };
 
             world.addComponent(collisionListenerId, BallCollisionListener { callback });

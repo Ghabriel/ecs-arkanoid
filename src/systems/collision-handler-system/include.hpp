@@ -2,4 +2,4 @@
 
 #include "../../engine-glue/ecs.hpp"
 
-void useCollisionHandlerSystem(ecs::ComponentManager&, ecs::Entity);
+void useCollisionHandlerSystem(ecs::ComponentManager&, ecs::Entity, ecs::Entity);

@@ -4,5 +4,5 @@
 #include "../engine/ecs/ECS.hpp"
 
 struct BallCollisionListener {
-    std::function<void(ecs::Entity)> fn;
+    std::function<void(ecs::Entity, ecs::Entity)> fn;
 };

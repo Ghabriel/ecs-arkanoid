@@ -1,7 +1,6 @@
 #include "include.hpp"
 
-#include <cmath>
-#include "../../constants.hpp"
+#include "../../helpers/ball-paddle-contact.hpp"
 
 void useLaunchingSystem(ecs::ComponentManager& world) {
     ecs::Entity paddleId = world.unique<Paddle>();
@@ -9,16 +8,7 @@ void useLaunchingSystem(ecs::ComponentManager& world) {
 
     world.query<Ball, Position>(
         [&world, &paddlePos](ecs::Entity ballId, Ball, const Position& pos) {
-            float dx = pos.x - paddlePos.x;
-            float dy = pos.y - paddlePos.y;
-            float angle = std::atan2(dy, dx);
-
-            using constants::BALL_VELOCITY;
-
-            world.replaceComponent(ballId, Velocity {
-                BALL_VELOCITY * std::cos(angle),
-                BALL_VELOCITY * std::sin(angle)
-            });
+            world.replaceComponent(ballId, getBallNewVelocity(pos, paddlePos));
         }
     );
 }

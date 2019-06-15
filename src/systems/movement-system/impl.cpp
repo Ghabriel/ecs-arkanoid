@@ -34,7 +34,12 @@ void resolveCollisions(ecs::ComponentManager& world, float elapsedTime) {
         .join<Circle>()
         .join<Position>()
         .join<Velocity>()
-        .forEach([&world, elapsedTime](const Circle& c, const Position& ballPos, Velocity& v) {
+        .forEach([&world, elapsedTime](
+            ecs::Entity ballId,
+            const Circle& c,
+            const Position& ballPos,
+            Velocity& v
+        ) {
             Velocity velocity { v.x * elapsedTime, v.y * elapsedTime };
             Position nextPositionX { ballPos.x + velocity.x, ballPos.y };
             Position nextPositionY { ballPos.x, ballPos.y + velocity.y };
@@ -43,7 +48,11 @@ void resolveCollisions(ecs::ComponentManager& world, float elapsedTime) {
 
             world.findAll<Rectangle>()
                 .join<Position>()
-                .forEach([&](ecs::Entity id, const Rectangle& r, const Position& rectPos) {
+                .forEach([&](
+                    ecs::Entity objectId,
+                    const Rectangle& r,
+                    const Position& rectPos
+                ) {
                     RectangleData rectangle { r, rectPos };
                     bool willCollide = false;
 
@@ -66,7 +75,7 @@ void resolveCollisions(ecs::ComponentManager& world, float elapsedTime) {
                     }
 
                     if (willCollide) {
-                        world.notify<BallCollisionListener>(id);
+                        world.notify<BallCollisionListener>(ballId, objectId);
                     }
                 });
             }
