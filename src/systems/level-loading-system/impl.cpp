@@ -5,11 +5,13 @@
 static void createPaddle(ecs::ComponentManager& world);
 static void createBall(ecs::ComponentManager& world);
 static void createBricks(ecs::ComponentManager& world);
+static void createWalls(ecs::ComponentManager& world);
 
 void useLevelLoadingSystem(ecs::ComponentManager& world) {
     createPaddle(world);
     createBall(world);
     createBricks(world);
+    createWalls(world);
 }
 
 void createPaddle(ecs::ComponentManager& world) {
@@ -71,4 +73,38 @@ void createBricks(ecs::ComponentManager& world) {
             );
         }
     }
+}
+
+void createWalls(ecs::ComponentManager& world) {
+    using constants::WINDOW_WIDTH;
+    using constants::WINDOW_HEIGHT;
+    using constants::BOARD_BORDER;
+
+    // Top
+    world.createEntity(
+        Position { WINDOW_WIDTH / 2, BOARD_BORDER / 2 },
+        Rectangle { WINDOW_WIDTH, BOARD_BORDER },
+        Visible { }
+    );
+
+    // Left
+    world.createEntity(
+        Position { BOARD_BORDER / 2, WINDOW_HEIGHT / 2 },
+        Rectangle { BOARD_BORDER, WINDOW_HEIGHT },
+        Visible { }
+    );
+
+    // Right
+    world.createEntity(
+        Position { WINDOW_WIDTH - BOARD_BORDER / 2, WINDOW_HEIGHT / 2 },
+        Rectangle { BOARD_BORDER, WINDOW_HEIGHT },
+        Visible { }
+    );
+
+    // Bottom
+    world.createEntity(
+        Position { WINDOW_WIDTH / 2, 0 },
+        Rectangle { WINDOW_WIDTH, BOARD_BORDER },
+        Visible { }
+    );
 }
