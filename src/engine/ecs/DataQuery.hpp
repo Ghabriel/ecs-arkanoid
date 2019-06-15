@@ -1,8 +1,8 @@
 #pragma once
 
 #include <type_traits>
+#include "../metaprogramming/lambda-argument-types.hpp"
 #include "ECS.hpp"
-#include "lambda-argument-types.hpp"
 
 namespace ecs {
     namespace __detail {
@@ -99,7 +99,7 @@ namespace ecs {
 
         template<typename Functor>
         void internalForEach(Functor fn, ComponentData<T>& baseData) {
-            __detail::Dispatcher<lambda_argument_types_t<Functor>> dispatcher;
+            __detail::Dispatcher<meta::lambda_argument_types_t<Functor>> dispatcher;
 
             if constexpr (sizeof...(Ts) > 0) {
                 for (auto& [entity, data] : baseData) {

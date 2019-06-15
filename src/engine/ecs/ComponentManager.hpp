@@ -1,22 +1,10 @@
 #pragma once
 
+#include "../metaprogramming/for-each-type.hpp"
 #include "DataQuery.hpp"
 #include "ECS.hpp"
 
 namespace ecs {
-    namespace __detail {
-        template<typename... Ts>
-        struct ForEachT;
-
-        template<typename... Ts>
-        struct ForEachT<std::tuple<Ts...>> {
-            template<typename F>
-            static void exec(F fn) {
-                (fn.template operator()<Ts>(), ...);
-            }
-        };
-    }
-
     /**
      * Manages the game entities and their components.
      *
@@ -149,7 +137,7 @@ namespace ecs {
             removeComponent<T>(entity);
         };
 
-        __detail::ForEachT<typename ECS::ComponentTypes>::exec(fn);
+        meta::ForEachT<typename ECS::ComponentTypes>::exec(fn);
     }
 
     template<typename ECS>

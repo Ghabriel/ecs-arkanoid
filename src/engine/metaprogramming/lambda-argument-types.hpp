@@ -2,7 +2,7 @@
 
 #include <functional>
 
-namespace ecs {
+namespace meta {
     namespace __detail {
         // Converts a functor into an appropriate function pointer.
         template<typename F>
