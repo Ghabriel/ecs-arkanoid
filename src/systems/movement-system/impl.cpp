@@ -1,6 +1,7 @@
 #include "include.hpp"
 
 #include <algorithm>
+#include <bitset>
 #include "../../constants.hpp"
 
 struct CircleData {
@@ -13,19 +14,13 @@ struct RectangleData {
     const Position& position;
 };
 
-struct CollisionAxis {
-    bool x;
-    bool y;
-};
-
-CollisionAxis& operator||(CollisionAxis& lhs, const CollisionAxis& rhs) {
-    lhs.x = lhs.x || rhs.x;
-    lhs.y = lhs.y || rhs.y;
-    return lhs;
+namespace Axis {
+    constexpr size_t X = 0;
+    constexpr size_t Y = 1;
 }
 
 static void resolveCollisions(ecs::ComponentManager&, float);
-static CollisionAxis resolveRectangleCollisions(
+static std::bitset<2> resolveRectangleCollisions(
     ecs::ComponentManager&,
     ecs::Entity,
     const CircleData&,
@@ -63,30 +58,30 @@ void resolveCollisions(ecs::ComponentManager& world, float elapsedTime) {
             CircleData nextCircleDataX { c, nextPositionX };
             CircleData nextCircleDataY { c, nextPositionY };
 
-            CollisionAxis collisionAxis = resolveRectangleCollisions(
+            std::bitset<2> collisionAxis = resolveRectangleCollisions(
                 world,
                 ballId,
                 nextCircleDataX,
                 nextCircleDataY
             );
 
-            if (collisionAxis.x) {
+            if (collisionAxis[Axis::X]) {
                 v.x *= -1;
             }
 
-            if (collisionAxis.y) {
+            if (collisionAxis[Axis::Y]) {
                 v.y *= -1;
             }
         });
 }
 
-CollisionAxis resolveRectangleCollisions(
+std::bitset<2> resolveRectangleCollisions(
     ecs::ComponentManager& world,
     ecs::Entity ballId,
     const CircleData& nextCircleDataX,
     const CircleData& nextCircleDataY
 ) {
-    CollisionAxis collisionAxis { false, false };
+    std::bitset<2> collisionAxis;
 
     world.findAll<Rectangle>()
         .join<Position>()
@@ -96,14 +91,13 @@ CollisionAxis resolveRectangleCollisions(
             const Position& rectPos
         ) {
             RectangleData rectangle { r, rectPos };
-            CollisionAxis willCollide {
-                collides(nextCircleDataX, rectangle),
-                collides(nextCircleDataY, rectangle)
-            };
+            std::bitset<2> willCollide;
+            willCollide.set(Axis::X, collides(nextCircleDataX, rectangle));
+            willCollide.set(Axis::Y, collides(nextCircleDataY, rectangle));
 
-            collisionAxis = collisionAxis || willCollide;
+            collisionAxis |= willCollide;
 
-            if (willCollide.x || willCollide.y) {
+            if (willCollide.any()) {
                 world.notify<BallCollisionListener>(ballId, objectId);
             }
         });
