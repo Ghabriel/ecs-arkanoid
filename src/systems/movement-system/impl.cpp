@@ -21,7 +21,8 @@ namespace Axis {
 }
 
 static void resolveCollisions(ecs::World&, float);
-static void resolvePaddleCollisions(
+static void resolveBallCollisions(ecs::World&, float);
+static void resolveBallPaddleCollisions(
     ecs::World&,
     ecs::Entity,
     const Position&,
@@ -36,7 +37,9 @@ static void resolveBounceCollisions(
     const CircleData&,
     Velocity&
 );
+static void resolvePaddleCollisions(ecs::World&, float);
 static bool collides(const CircleData&, const RectangleData&);
+static bool solveCollision(const Rectangle&, Position&, const Velocity&, const RectangleData&);
 
 void useMovementSystem(ecs::World& world, float elapsedTime) {
     resolveCollisions(world, elapsedTime);
@@ -52,6 +55,11 @@ void useMovementSystem(ecs::World& world, float elapsedTime) {
 }
 
 void resolveCollisions(ecs::World& world, float elapsedTime) {
+    resolveBallCollisions(world, elapsedTime);
+    resolvePaddleCollisions(world, elapsedTime);
+}
+
+void resolveBallCollisions(ecs::World& world, float elapsedTime) {
     world.findAll<Ball>()
         .join<Circle>()
         .join<Position>()
@@ -68,26 +76,12 @@ void resolveCollisions(ecs::World& world, float elapsedTime) {
             CircleData nextCircleDataX { c, nextPositionX };
             CircleData nextCircleDataY { c, nextPositionY };
 
-            resolvePaddleCollisions(
-                world,
-                ballId,
-                ballPos,
-                nextCircleDataX,
-                nextCircleDataY,
-                v
-            );
-
-            resolveBounceCollisions(
-                world,
-                ballId,
-                nextCircleDataX,
-                nextCircleDataY,
-                v
-            );
+            resolveBallPaddleCollisions(world, ballId, ballPos, nextCircleDataX, nextCircleDataY, v);
+            resolveBounceCollisions(world, ballId, nextCircleDataX, nextCircleDataY, v);
         });
 }
 
-void resolvePaddleCollisions(
+void resolveBallPaddleCollisions(
     ecs::World& world,
     ecs::Entity ballId,
     const Position& ballPos,
@@ -153,6 +147,40 @@ void resolveBounceCollisions(
     }
 }
 
+void resolvePaddleCollisions(ecs::World& world, float elapsedTime) {
+    world.findAll<Paddle>()
+        .join<Rectangle>()
+        .join<Position>()
+        .join<Velocity>()
+        .forEach([&world, elapsedTime](
+            ecs::Entity paddleId,
+            const Rectangle& paddleBody,
+            Position& paddlePos,
+            Velocity& paddleVelocity
+        ) {
+            Velocity velocity {
+                paddleVelocity.x * elapsedTime,
+                paddleVelocity.y * elapsedTime
+            };
+
+            world.findAll<Wall>()
+                .join<Rectangle>()
+                .join<Position>()
+                .forEach([&](
+                    ecs::Entity objectId,
+                    const Rectangle& r,
+                    const Position& rectPos
+                ) {
+                    RectangleData wall { r, rectPos };
+                    bool collided = solveCollision(paddleBody, paddlePos, velocity, wall);
+
+                    if (collided) {
+                        world.removeComponent<Velocity>(paddleId);
+                    }
+                });
+        });
+}
+
 bool collides(const CircleData& c, const RectangleData& r) {
     const auto& [circle, circlePos] = c;
     const auto& [rectangle, rectPos] = r;
@@ -170,4 +198,49 @@ bool collides(const CircleData& c, const RectangleData& r) {
     float dy = circlePos.y - closestY;
 
     return (dx * dx) + (dy * dy) < (circle.radius * circle.radius);
+}
+
+bool solveCollision(
+    const Rectangle& paddleBody,
+    Position& paddlePos,
+    const Velocity& paddleVelocity,
+    const RectangleData& wall
+) {
+    auto leftX = [](auto& data) { return data.position.x - data.body.width / 2; };
+    auto rightX = [](auto& data) { return data.position.x + data.body.width / 2; };
+    auto topY = [](auto& data) { return data.position.y - data.body.height / 2; };
+    auto bottomY = [](auto& data) { return data.position.y + data.body.height / 2; };
+
+    RectangleData paddle { paddleBody, paddlePos };
+    Position nextPaddlePos { paddlePos.x + paddleVelocity.x, paddlePos.y + paddleVelocity.y };
+    RectangleData futurePaddle { paddle.body, nextPaddlePos };
+
+    float checkLeft = rightX(wall) <= leftX(futurePaddle);
+    float checkRight = rightX(futurePaddle) <= leftX(wall);
+    float checkTop = bottomY(wall) <= topY(futurePaddle);
+    float checkBottom = bottomY(futurePaddle) <= topY(wall);
+
+    if (checkLeft || checkRight || checkTop || checkBottom) {
+        return false;
+    }
+
+    std::array<float, 4> ts {
+        (rightX(wall) - leftX(paddle)) / paddleVelocity.x,
+        (leftX(wall) - rightX(paddle)) / paddleVelocity.x,
+        (bottomY(wall) - topY(paddle)) / paddleVelocity.y,
+        (topY(wall) - bottomY(paddle)) / paddleVelocity.y
+    };
+
+    float minValidT = 1;
+
+    for (float t : ts) {
+        if (t >= 0 && t < minValidT) {
+            minValidT = t;
+        }
+    }
+
+    paddlePos.x += paddleVelocity.x * minValidT;
+    paddlePos.y += paddleVelocity.y * minValidT;
+
+    return true;
 }

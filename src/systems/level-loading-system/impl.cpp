@@ -87,7 +87,8 @@ void createWalls(ecs::World& world) {
         BounceCollision { },
         Position { WINDOW_WIDTH / 2, BOARD_BORDER / 2 },
         Rectangle { WINDOW_WIDTH, BOARD_BORDER },
-        Visible { }
+        Visible { },
+        Wall { }
     );
 
     // Left
@@ -95,7 +96,8 @@ void createWalls(ecs::World& world) {
         BounceCollision { },
         Position { BOARD_BORDER / 2, WINDOW_HEIGHT / 2 },
         Rectangle { BOARD_BORDER, WINDOW_HEIGHT },
-        Visible { }
+        Visible { },
+        Wall { }
     );
 
     // Right
@@ -103,7 +105,8 @@ void createWalls(ecs::World& world) {
         BounceCollision { },
         Position { WINDOW_WIDTH - BOARD_BORDER / 2, WINDOW_HEIGHT / 2 },
         Rectangle { BOARD_BORDER, WINDOW_HEIGHT },
-        Visible { }
+        Visible { },
+        Wall { }
     );
 
     // Bottom
@@ -111,6 +114,7 @@ void createWalls(ecs::World& world) {
         BounceCollision { },
         Position { WINDOW_WIDTH / 2, 0 },
         Rectangle { WINDOW_WIDTH, BOARD_BORDER },
-        Visible { }
+        Visible { },
+        Wall { }
     );
 }

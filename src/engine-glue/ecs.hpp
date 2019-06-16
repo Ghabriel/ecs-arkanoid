@@ -11,6 +11,7 @@
 #include "../components/Rectangle.hpp"
 #include "../components/Velocity.hpp"
 #include "../components/Visible.hpp"
+#include "../components/Wall.hpp"
 #include "../engine/ecs/include.hpp"
 
 namespace ecs {
@@ -25,7 +26,8 @@ namespace ecs {
         Position,
         Rectangle,
         Velocity,
-        Visible
+        Visible,
+        Wall
     >;
 
     using World = GenericWorld<ECS>;
