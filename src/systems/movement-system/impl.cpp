@@ -52,6 +52,20 @@ void useMovementSystem(ecs::World& world, float elapsedTime) {
                 pos.y += v.y * elapsedTime;
             }
         );
+
+    world.findAll<Link>()
+        .join<Position>()
+        .forEach(
+            [&world, elapsedTime](const Link& link, Position& pos) {
+                ecs::Entity target = link.target;
+
+                if (world.hasComponent<Velocity>(target)) {
+                    const Velocity& v = world.getData<Velocity>(target);
+                    pos.x += v.x * elapsedTime;
+                    pos.y += v.y * elapsedTime;
+                }
+            }
+        );
 }
 
 void resolveCollisions(ecs::World& world, float elapsedTime) {

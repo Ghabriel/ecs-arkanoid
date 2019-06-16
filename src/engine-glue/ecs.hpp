@@ -2,6 +2,7 @@
 
 #include "../components/BallCollisionListener.hpp"
 #include "../components/Circle.hpp"
+#include "../components/Link.hpp"
 #include "../components/Position.hpp"
 #include "../components/Rectangle.hpp"
 #include "../components/Tags.hpp"
@@ -16,6 +17,7 @@ namespace ecs {
         Brick,
         Circle,
         Input,
+        Link,
         Paddle,
         Position,
         Rectangle,
