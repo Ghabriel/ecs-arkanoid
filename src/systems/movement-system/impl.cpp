@@ -219,22 +219,26 @@ bool solveCollision(
     auto bottomY = [](auto& data) { return data.position.y + data.body.height / 2; };
 
     RectangleData paddle { paddleBody, paddlePos };
-    RectangleData futurePaddle { paddle.body, paddlePos + paddleVelocity };
 
-    float checkLeft = rightX(wall) <= leftX(futurePaddle);
-    float checkRight = rightX(futurePaddle) <= leftX(wall);
-    float checkTop = bottomY(wall) <= topY(futurePaddle);
-    float checkBottom = bottomY(futurePaddle) <= topY(wall);
+    float distanceLeft = rightX(wall) - leftX(paddle);
+    float distanceRight = leftX(wall) - rightX(paddle);
+    float distanceTop = bottomY(wall) - topY(paddle);
+    float distanceBottom = topY(wall) - bottomY(paddle);
+
+    float checkLeft = distanceLeft <= paddleVelocity.x;
+    float checkRight = paddleVelocity.x <= distanceRight;
+    float checkTop = distanceTop <= paddleVelocity.y;
+    float checkBottom = paddleVelocity.y <= distanceBottom;
 
     if (checkLeft || checkRight || checkTop || checkBottom) {
         return false;
     }
 
     std::array<float, 4> ts {
-        (rightX(wall) - leftX(paddle)) / paddleVelocity.x,
-        (leftX(wall) - rightX(paddle)) / paddleVelocity.x,
-        (bottomY(wall) - topY(paddle)) / paddleVelocity.y,
-        (topY(wall) - bottomY(paddle)) / paddleVelocity.y
+        distanceLeft / paddleVelocity.x,
+        distanceRight / paddleVelocity.x,
+        distanceTop / paddleVelocity.y,
+        distanceBottom / paddleVelocity.y
     };
 
     float minValidT = 1;
