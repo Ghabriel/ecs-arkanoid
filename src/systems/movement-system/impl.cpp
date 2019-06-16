@@ -48,8 +48,7 @@ void useMovementSystem(ecs::World& world, float elapsedTime) {
         .join<Velocity>()
         .forEach(
             [elapsedTime](Position& pos, const Velocity& v) {
-                pos.x += v.x * elapsedTime;
-                pos.y += v.y * elapsedTime;
+                pos += v * elapsedTime;
             }
         );
 
@@ -60,8 +59,7 @@ void useMovementSystem(ecs::World& world, float elapsedTime) {
                 ecs::Entity target = link.target;
                 const Position& targetPos = world.getData<Position>(target);
 
-                pos.x = targetPos.x + link.relativePosition.x;
-                pos.y = targetPos.y + link.relativePosition.y;
+                pos = targetPos + link.relativePosition;
             }
         );
 }
@@ -82,7 +80,7 @@ void resolveBallCollisions(ecs::World& world, float elapsedTime) {
             const Position& ballPos,
             Velocity& v
         ) {
-            Velocity velocity { v.x * elapsedTime, v.y * elapsedTime };
+            Velocity velocity = v * elapsedTime;
             Position nextPositionX { ballPos.x + velocity.x, ballPos.y };
             Position nextPositionY { ballPos.x, ballPos.y + velocity.y };
             CircleData nextCircleDataX { c, nextPositionX };
@@ -170,10 +168,7 @@ void resolvePaddleCollisions(ecs::World& world, float elapsedTime) {
             Position& paddlePos,
             Velocity& paddleVelocity
         ) {
-            Velocity velocity {
-                paddleVelocity.x * elapsedTime,
-                paddleVelocity.y * elapsedTime
-            };
+            Velocity velocity = paddleVelocity * elapsedTime;
 
             world.findAll<Wall>()
                 .join<Rectangle>()
@@ -224,8 +219,7 @@ bool solveCollision(
     auto bottomY = [](auto& data) { return data.position.y + data.body.height / 2; };
 
     RectangleData paddle { paddleBody, paddlePos };
-    Position nextPaddlePos { paddlePos.x + paddleVelocity.x, paddlePos.y + paddleVelocity.y };
-    RectangleData futurePaddle { paddle.body, nextPaddlePos };
+    RectangleData futurePaddle { paddle.body, paddlePos + paddleVelocity };
 
     float checkLeft = rightX(wall) <= leftX(futurePaddle);
     float checkRight = rightX(futurePaddle) <= leftX(wall);
@@ -251,8 +245,7 @@ bool solveCollision(
         }
     }
 
-    paddlePos.x += paddleVelocity.x * minValidT;
-    paddlePos.y += paddleVelocity.y * minValidT;
+    paddlePos += paddleVelocity * minValidT;
 
     return true;
 }

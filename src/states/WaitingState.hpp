@@ -23,9 +23,8 @@ class WaitingState : public state::State {
 
             const Position& ballPos = world.getData<Position>(ball);
             const Position& paddlePos = world.getData<Position>(paddle);
-            Position relativePos { ballPos.x - paddlePos.x, ballPos.y - paddlePos.y };
 
-            world.addComponent(ball, Link { paddle, relativePos });
+            world.addComponent(ball, Link { paddle, ballPos - paddlePos });
 
             return [this, ball] {
                 world.removeComponent<Link>(ball);

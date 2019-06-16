@@ -1,6 +1,5 @@
 #pragma once
 
-struct Velocity {
-    float x;
-    float y;
-};
+#include "../mixins/PointLike.hpp"
+
+struct Velocity : PointLike<Velocity> { };

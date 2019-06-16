@@ -1,6 +1,5 @@
 #pragma once
 
-struct Position {
-    float x;
-    float y;
-};
+#include "../mixins/PointLike.hpp"
+
+struct Position : PointLike<Position> { };
