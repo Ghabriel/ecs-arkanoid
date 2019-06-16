@@ -2,4 +2,4 @@
 
 #include "../../engine-glue/ecs.hpp"
 
-void useLaunchingSystem(ecs::ComponentManager&);
+void useLaunchingSystem(ecs::World&);

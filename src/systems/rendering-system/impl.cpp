@@ -2,15 +2,15 @@
 
 #include "../../constants.hpp"
 
-static void renderCircles(ecs::ComponentManager&, sf::RenderWindow&);
-static void renderRectangles(ecs::ComponentManager&, sf::RenderWindow&);
+static void renderCircles(ecs::World&, sf::RenderWindow&);
+static void renderRectangles(ecs::World&, sf::RenderWindow&);
 
-void useRenderingSystem(ecs::ComponentManager& world, sf::RenderWindow& window) {
+void useRenderingSystem(ecs::World& world, sf::RenderWindow& window) {
     renderCircles(world, window);
     renderRectangles(world, window);
 }
 
-void renderCircles(ecs::ComponentManager& world, sf::RenderWindow& window) {
+void renderCircles(ecs::World& world, sf::RenderWindow& window) {
     world.findAll<Visible>()
         .join<Circle>()
         .join<Position>()
@@ -28,7 +28,7 @@ void renderCircles(ecs::ComponentManager& world, sf::RenderWindow& window) {
         );
 }
 
-void renderRectangles(ecs::ComponentManager& world, sf::RenderWindow& window) {
+void renderRectangles(ecs::World& world, sf::RenderWindow& window) {
     world.findAll<Visible>()
         .join<Rectangle>()
         .join<Position>()

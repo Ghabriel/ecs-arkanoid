@@ -2,4 +2,4 @@
 
 #include "../../engine-glue/ecs.hpp"
 
-void useMovementSystem(ecs::ComponentManager&, float elapsedTime);
+void useMovementSystem(ecs::World&, float elapsedTime);

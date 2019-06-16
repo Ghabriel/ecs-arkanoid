@@ -11,7 +11,7 @@
 class RunningState : public state::State {
  public:
     RunningState(
-        ecs::ComponentManager& world,
+        ecs::World& world,
         state::StateMachine& stateMachine
     ) : world(world), stateMachine(stateMachine) {
         collisionListenerId = world.createEntity();
@@ -46,7 +46,7 @@ class RunningState : public state::State {
     }
 
  private:
-    ecs::ComponentManager& world;
+    ecs::World& world;
     state::StateMachine& stateMachine;
     ecs::Entity collisionListenerId;
 };

@@ -3,4 +3,4 @@
 #include <SFML/Graphics.hpp>
 #include "../../engine-glue/ecs.hpp"
 
-void useRenderingSystem(ecs::ComponentManager&, sf::RenderWindow&);
+void useRenderingSystem(ecs::World&, sf::RenderWindow&);

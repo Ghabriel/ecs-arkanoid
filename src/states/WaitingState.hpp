@@ -10,7 +10,7 @@
 class WaitingState : public state::State {
  public:
     WaitingState(
-        ecs::ComponentManager& world,
+        ecs::World& world,
         state::StateMachine& stateMachine
     ) : world(world), stateMachine(stateMachine) { }
 
@@ -45,6 +45,6 @@ class WaitingState : public state::State {
     }
 
  private:
-    ecs::ComponentManager& world;
+    ecs::World& world;
     state::StateMachine& stateMachine;
 };

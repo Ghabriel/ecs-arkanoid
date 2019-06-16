@@ -20,9 +20,9 @@ namespace Axis {
     constexpr size_t Y = 1;
 }
 
-static void resolveCollisions(ecs::ComponentManager&, float);
+static void resolveCollisions(ecs::World&, float);
 static void resolvePaddleCollisions(
-    ecs::ComponentManager&,
+    ecs::World&,
     ecs::Entity,
     const Position&,
     const CircleData&,
@@ -30,7 +30,7 @@ static void resolvePaddleCollisions(
     Velocity&
 );
 static void resolveBounceCollisions(
-    ecs::ComponentManager&,
+    ecs::World&,
     ecs::Entity,
     const CircleData&,
     const CircleData&,
@@ -38,7 +38,7 @@ static void resolveBounceCollisions(
 );
 static bool collides(const CircleData&, const RectangleData&);
 
-void useMovementSystem(ecs::ComponentManager& world, float elapsedTime) {
+void useMovementSystem(ecs::World& world, float elapsedTime) {
     resolveCollisions(world, elapsedTime);
 
     world.findAll<Position>()
@@ -51,7 +51,7 @@ void useMovementSystem(ecs::ComponentManager& world, float elapsedTime) {
         );
 }
 
-void resolveCollisions(ecs::ComponentManager& world, float elapsedTime) {
+void resolveCollisions(ecs::World& world, float elapsedTime) {
     world.findAll<Ball>()
         .join<Circle>()
         .join<Position>()
@@ -88,7 +88,7 @@ void resolveCollisions(ecs::ComponentManager& world, float elapsedTime) {
 }
 
 void resolvePaddleCollisions(
-    ecs::ComponentManager& world,
+    ecs::World& world,
     ecs::Entity ballId,
     const Position& ballPos,
     const CircleData& nextCircleDataX,
@@ -116,7 +116,7 @@ void resolvePaddleCollisions(
 }
 
 void resolveBounceCollisions(
-    ecs::ComponentManager& world,
+    ecs::World& world,
     ecs::Entity ballId,
     const CircleData& nextCircleDataX,
     const CircleData& nextCircleDataY,

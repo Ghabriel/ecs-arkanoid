@@ -24,6 +24,6 @@ class Game {
     }
 
  private:
-    ecs::ComponentManager world;
+    ecs::World world;
     state::StateMachine stateMachine;
 };

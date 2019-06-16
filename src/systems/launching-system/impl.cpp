@@ -2,7 +2,7 @@
 
 #include "../../helpers/ball-paddle-contact.hpp"
 
-void useLaunchingSystem(ecs::ComponentManager& world) {
+void useLaunchingSystem(ecs::World& world) {
     ecs::Entity paddleId = world.unique<Paddle>();
     const Position& paddlePos = world.getData<Position>(paddleId);
 

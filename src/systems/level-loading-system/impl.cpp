@@ -2,19 +2,19 @@
 
 #include "../../constants.hpp"
 
-static void createPaddle(ecs::ComponentManager& world);
-static void createBall(ecs::ComponentManager& world);
-static void createBricks(ecs::ComponentManager& world);
-static void createWalls(ecs::ComponentManager& world);
+static void createPaddle(ecs::World& world);
+static void createBall(ecs::World& world);
+static void createBricks(ecs::World& world);
+static void createWalls(ecs::World& world);
 
-void useLevelLoadingSystem(ecs::ComponentManager& world) {
+void useLevelLoadingSystem(ecs::World& world) {
     createPaddle(world);
     createBall(world);
     createBricks(world);
     createWalls(world);
 }
 
-void createPaddle(ecs::ComponentManager& world) {
+void createPaddle(ecs::World& world) {
     using constants::WINDOW_WIDTH;
     using constants::WINDOW_HEIGHT;
     using constants::PADDLE_WIDTH;
@@ -33,7 +33,7 @@ void createPaddle(ecs::ComponentManager& world) {
     );
 }
 
-void createBall(ecs::ComponentManager& world) {
+void createBall(ecs::World& world) {
     using constants::WINDOW_WIDTH;
     using constants::WINDOW_HEIGHT;
     using constants::BALL_RADIUS;
@@ -51,7 +51,7 @@ void createBall(ecs::ComponentManager& world) {
     );
 }
 
-void createBricks(ecs::ComponentManager& world) {
+void createBricks(ecs::World& world) {
     using constants::WINDOW_WIDTH;
     using constants::BRICK_WIDTH;
     using constants::BRICK_HEIGHT;
@@ -77,7 +77,7 @@ void createBricks(ecs::ComponentManager& world) {
     }
 }
 
-void createWalls(ecs::ComponentManager& world) {
+void createWalls(ecs::World& world) {
     using constants::WINDOW_WIDTH;
     using constants::WINDOW_HEIGHT;
     using constants::BOARD_BORDER;

@@ -5,11 +5,11 @@
 
 #include <iostream>
 
-static void handlePaddleCollision(ecs::ComponentManager&, ecs::Entity, ecs::Entity);
-static void handleBrickCollision(ecs::ComponentManager&, ecs::Entity, ecs::Entity);
+static void handlePaddleCollision(ecs::World&, ecs::Entity, ecs::Entity);
+static void handleBrickCollision(ecs::World&, ecs::Entity, ecs::Entity);
 
 void useCollisionHandlerSystem(
-    ecs::ComponentManager& world,
+    ecs::World& world,
     ecs::Entity ballId,
     ecs::Entity objectId
 ) {
@@ -27,7 +27,7 @@ void useCollisionHandlerSystem(
 }
 
 void handlePaddleCollision(
-    ecs::ComponentManager& world,
+    ecs::World& world,
     ecs::Entity ballId,
     ecs::Entity paddleId
 ) {
@@ -35,7 +35,7 @@ void handlePaddleCollision(
 }
 
 void handleBrickCollision(
-    ecs::ComponentManager& world,
+    ecs::World& world,
     ecs::Entity ballId,
     ecs::Entity brickId
 ) {

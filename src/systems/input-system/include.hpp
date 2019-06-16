@@ -2,4 +2,4 @@
 
 #include "../../engine-glue/ecs.hpp"
 
-void useInputSystem(ecs::ComponentManager&);
+void useInputSystem(ecs::World&);

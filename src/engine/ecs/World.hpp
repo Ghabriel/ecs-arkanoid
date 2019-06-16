@@ -14,7 +14,7 @@ namespace ecs {
      * operate on the data bound to the entities.
      */
     template<typename ECS>
-    class GenericComponentManager {
+    class GenericWorld {
      public:
         /**
          * Creates a new entity with the given components, if any.
@@ -125,14 +125,14 @@ namespace ecs {
 
     template<typename ECS>
     template<typename... Ts>
-    inline Entity GenericComponentManager<ECS>::createEntity(Ts&&... data) {
+    inline Entity GenericWorld<ECS>::createEntity(Ts&&... data) {
         Entity id = storage.nextEntityId++;
         (addComponent<Ts>(id, std::forward<Ts>(data)), ...);
         return id;
     }
 
     template<typename ECS>
-    inline void GenericComponentManager<ECS>::deleteEntity(Entity entity) {
+    inline void GenericWorld<ECS>::deleteEntity(Entity entity) {
         auto fn = [this, entity]<typename T>() {
             removeComponent<T>(entity);
         };
@@ -142,7 +142,7 @@ namespace ecs {
 
     template<typename ECS>
     template<typename T>
-    inline void GenericComponentManager<ECS>::addComponent(Entity entity, T&& data) {
+    inline void GenericWorld<ECS>::addComponent(Entity entity, T&& data) {
         entityData<std::decay_t<T>>(storage).insert({
             entity,
             std::forward<T>(data)
@@ -151,13 +151,13 @@ namespace ecs {
 
     template<typename ECS>
     template<typename T>
-    inline void GenericComponentManager<ECS>::removeComponent(Entity entity) {
+    inline void GenericWorld<ECS>::removeComponent(Entity entity) {
         entityData<T>(storage).erase(entity);
     }
 
     template<typename ECS>
     template<typename T>
-    inline void GenericComponentManager<ECS>::replaceComponent(Entity entity, T&& data) {
+    inline void GenericWorld<ECS>::replaceComponent(Entity entity, T&& data) {
         entityData<std::decay_t<T>>(storage).insert_or_assign(
             entity,
             std::forward<T>(data)
@@ -166,32 +166,32 @@ namespace ecs {
 
     template<typename ECS>
     template<typename T>
-    inline bool GenericComponentManager<ECS>::hasComponent(Entity entity) const {
+    inline bool GenericWorld<ECS>::hasComponent(Entity entity) const {
         return entityData<T>(storage).count(entity);
     }
 
     template<typename ECS>
     template<typename... Ts>
-    bool GenericComponentManager<ECS>::hasAllComponents(Entity entity) const {
+    bool GenericWorld<ECS>::hasAllComponents(Entity entity) const {
         return (hasComponent<Ts>(entity) && ...);
     }
 
     template<typename ECS>
     template<typename T>
-    inline T& GenericComponentManager<ECS>::getData(Entity entity) {
+    inline T& GenericWorld<ECS>::getData(Entity entity) {
         return entityData<T>(storage).at(entity);
     }
 
     template<typename ECS>
     template<typename T, typename... Ts, typename Functor>
-    inline void GenericComponentManager<ECS>::query(Functor fn) {
+    inline void GenericWorld<ECS>::query(Functor fn) {
         ComponentData<T>& baseData = entityData<T>(storage);
         internalQuery<T, Ts...>(fn, baseData);
     }
 
     template<typename ECS>
     template<typename T, typename... Ts, typename Functor>
-    inline void GenericComponentManager<ECS>::mutatingQuery(Functor fn) {
+    inline void GenericWorld<ECS>::mutatingQuery(Functor fn) {
         // Makes a copy due to potential iterator invalidation
         ComponentData<T> baseData = entityData<T>(storage);
         internalQuery<T, Ts...>(fn, baseData);
@@ -199,7 +199,7 @@ namespace ecs {
 
     template<typename ECS>
     template<typename T, typename... Args>
-    inline void GenericComponentManager<ECS>::notify(Args&&... args) {
+    inline void GenericWorld<ECS>::notify(Args&&... args) {
         mutatingQuery<T>([&](Entity, T& listener) {
             listener.fn(std::forward<Args>(args)...);
         });
@@ -207,7 +207,7 @@ namespace ecs {
 
     template<typename ECS>
     template<typename T>
-    inline Entity GenericComponentManager<ECS>::unique() {
+    inline Entity GenericWorld<ECS>::unique() {
         Entity result = 0;
         query<T>([&result](Entity id, const T&) { result = id; });
         return result;
@@ -215,13 +215,13 @@ namespace ecs {
 
     template<typename ECS>
     template<typename T>
-    inline GenericDataQuery<ECS, Desirable<T>, Undesirable<>> GenericComponentManager<ECS>::findAll() {
+    inline GenericDataQuery<ECS, Desirable<T>, Undesirable<>> GenericWorld<ECS>::findAll() {
         return GenericDataQuery<ECS, Desirable<T>, Undesirable<>>(storage);
     }
 
     template<typename ECS>
     template<typename T, typename... Ts, typename Functor>
-    inline void GenericComponentManager<ECS>::internalQuery(Functor fn, ComponentData<T>& baseData) {
+    inline void GenericWorld<ECS>::internalQuery(Functor fn, ComponentData<T>& baseData) {
         if constexpr (sizeof...(Ts) > 0) {
             for (auto& [entity, data] : baseData) {
                 if (hasAllComponents<Ts...>(entity)) {

@@ -2,5 +2,5 @@
 
 #include "../../engine-glue/ecs.hpp"
 
-void useLevelLoadingSystem(ecs::ComponentManager&);
+void useLevelLoadingSystem(ecs::World&);
 

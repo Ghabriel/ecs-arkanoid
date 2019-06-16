@@ -3,7 +3,7 @@
 #include <SFML/Graphics.hpp>
 #include "../../constants.hpp"
 
-void useInputSystem(ecs::ComponentManager& world) {
+void useInputSystem(ecs::World& world) {
     world.findAll<Input>()
         .forEach(
             [&world](ecs::Entity id) {

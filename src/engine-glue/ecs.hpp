@@ -28,7 +28,7 @@ namespace ecs {
         Visible
     >;
 
-    using ComponentManager = GenericComponentManager<ECS>;
+    using World = GenericWorld<ECS>;
 
     template<typename T, typename... Ts>
     using DataQuery = GenericDataQuery<ECS, T, Ts...>;
