@@ -58,12 +58,10 @@ void useMovementSystem(ecs::World& world, float elapsedTime) {
         .forEach(
             [&world, elapsedTime](const Link& link, Position& pos) {
                 ecs::Entity target = link.target;
+                const Position& targetPos = world.getData<Position>(target);
 
-                if (world.hasComponent<Velocity>(target)) {
-                    const Velocity& v = world.getData<Velocity>(target);
-                    pos.x += v.x * elapsedTime;
-                    pos.y += v.y * elapsedTime;
-                }
+                pos.x = targetPos.x + link.relativePosition.x;
+                pos.y = targetPos.y + link.relativePosition.y;
             }
         );
 }
