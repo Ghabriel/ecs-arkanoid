@@ -1,5 +1,6 @@
 #pragma once
 
+#include <tuple>
 #include <type_traits>
 #include "../metaprogramming/lambda-argument-types.hpp"
 #include "ECS.hpp"
@@ -34,8 +35,17 @@ namespace ecs {
         };
     }
 
-    template<typename ECS, typename T, typename... Ts>
-    class GenericDataQuery {
+    template<typename... Ts>
+    struct Desirable { };
+
+    template<typename... Ts>
+    struct Undesirable { };
+
+    template<typename ECS, typename... Ts>
+    class GenericDataQuery;
+
+    template<typename ECS, typename T, typename... Ts, typename... Us>
+    class GenericDataQuery<ECS, Desirable<T, Ts...>, Undesirable<Us...>> {
     public:
         explicit GenericDataQuery(ECS& storage) : storage(storage) { }
 
@@ -43,8 +53,24 @@ namespace ecs {
          * Returns a `GenericDataQuery` with an additional `U` filter.
          */
         template<typename U>
-        GenericDataQuery<ECS, T, Ts..., U> join() {
-            return GenericDataQuery<ECS, T, Ts..., U>(storage);
+        auto join() const {
+            return GenericDataQuery<
+                ECS,
+                Desirable<T, Ts..., U>,
+                Undesirable<Us...>
+            >(storage);
+        }
+
+        /**
+         * Returns a `GenericDataQuery` that ignores entities with `U` components.
+         */
+        template<typename U>
+        auto ignore() const {
+            return GenericDataQuery<
+                ECS,
+                Desirable<T, Ts...>,
+                Undesirable<Us..., U>
+            >(storage);
         }
 
         /**
@@ -86,24 +112,23 @@ namespace ecs {
             return entityData<U>(storage).count(entity);
         }
 
-        template<typename U, typename... Us>
+        template<typename... Vs>
         bool hasAllComponents(Entity entity) const {
-            bool hasT = hasComponent<U>(entity);
+            return (hasComponent<Vs>(entity) && ...);
+        }
 
-            if constexpr (sizeof...(Us) > 0) {
-                return hasT && hasAllComponents<Us...>(entity);
-            } else {
-                return hasT;
-            }
+        template<typename... Vs>
+        bool hasNoComponents(Entity entity) const {
+            return (!hasComponent<Vs>(entity) && ...);
         }
 
         template<typename Functor>
         void internalForEach(Functor fn, ComponentData<T>& baseData) {
             __detail::Dispatcher<meta::lambda_argument_types_t<Functor>> dispatcher;
 
-            if constexpr (sizeof...(Ts) > 0) {
+            if constexpr (sizeof...(Ts) > 0 || sizeof...(Us) > 0) {
                 for (auto& [entity, data] : baseData) {
-                    if (hasAllComponents<Ts...>(entity)) {
+                    if (hasAllComponents<Ts...>(entity) && hasNoComponents<Us...>(entity)) {
                         dispatcher(storage, fn, entity);
                     }
                 }

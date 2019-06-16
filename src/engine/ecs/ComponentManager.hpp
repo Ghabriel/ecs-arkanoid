@@ -113,7 +113,7 @@ namespace ecs {
          * filters all entities with a T component.
          */
         template<typename T>
-        GenericDataQuery<ECS, T> findAll();
+        GenericDataQuery<ECS, Desirable<T>, Undesirable<>> findAll();
 
      private:
         ECS storage;
@@ -215,8 +215,8 @@ namespace ecs {
 
     template<typename ECS>
     template<typename T>
-    inline GenericDataQuery<ECS, T> GenericComponentManager<ECS>::findAll() {
-        return GenericDataQuery<ECS, T>(storage);
+    inline GenericDataQuery<ECS, Desirable<T>, Undesirable<>> GenericComponentManager<ECS>::findAll() {
+        return GenericDataQuery<ECS, Desirable<T>, Undesirable<>>(storage);
     }
 
     template<typename ECS>
