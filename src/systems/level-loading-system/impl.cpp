@@ -29,6 +29,7 @@ void createPaddle(ecs::World& world) {
         Paddle { },
         Position { x, y },
         Rectangle { PADDLE_WIDTH, PADDLE_HEIGHT },
+        Style { sf::Color::White, sf::Color::Blue, 1 },
         Visible { }
     );
 }
@@ -47,6 +48,7 @@ void createBall(ecs::World& world) {
         Ball { },
         Circle { BALL_RADIUS },
         Position { x, y },
+        Style { sf::Color::Blue, sf::Color::Green, 2 },
         Visible { }
     );
 }
@@ -60,6 +62,15 @@ void createBricks(ecs::World& world) {
     constexpr float MAX_X = WINDOW_WIDTH - BOARD_BORDER;
     constexpr int BRICKS_PER_ROW = (MAX_X - BOARD_BORDER) / BRICK_WIDTH;
 
+    std::array<Style, 6> styles {
+        Style { sf::Color::White, sf::Color::Blue, 1 },
+        Style { sf::Color::Green, sf::Color::Blue, 1 },
+        Style { sf::Color::White, sf::Color::Blue, 1 },
+        Style { sf::Color::Green, sf::Color::Blue, 1 },
+        Style { sf::Color::White, sf::Color::Blue, 1 },
+        Style { sf::Color::Green, sf::Color::Blue, 1 }
+    };
+
     for (int i = 0; i < BRICKS_PER_ROW; i++) {
         float x = BOARD_BORDER + i * BRICK_WIDTH + BRICK_WIDTH / 2;
 
@@ -71,6 +82,7 @@ void createBricks(ecs::World& world) {
                 Brick { },
                 Position { x, y },
                 Rectangle { BRICK_WIDTH, BRICK_HEIGHT },
+                styles[j],
                 Visible { }
             );
         }
@@ -82,11 +94,14 @@ void createWalls(ecs::World& world) {
     using constants::WINDOW_HEIGHT;
     using constants::BOARD_BORDER;
 
+    Style style { sf::Color::White, sf::Color::White, 1 };
+
     // Top
     world.createEntity(
         BounceCollision { },
         Position { WINDOW_WIDTH / 2, BOARD_BORDER / 2 },
         Rectangle { WINDOW_WIDTH, BOARD_BORDER },
+        style,
         Visible { },
         Wall { }
     );
@@ -96,6 +111,7 @@ void createWalls(ecs::World& world) {
         BounceCollision { },
         Position { BOARD_BORDER / 2, WINDOW_HEIGHT / 2 },
         Rectangle { BOARD_BORDER, WINDOW_HEIGHT },
+        style,
         Visible { },
         Wall { }
     );
@@ -105,6 +121,7 @@ void createWalls(ecs::World& world) {
         BounceCollision { },
         Position { WINDOW_WIDTH - BOARD_BORDER / 2, WINDOW_HEIGHT / 2 },
         Rectangle { BOARD_BORDER, WINDOW_HEIGHT },
+        style,
         Visible { },
         Wall { }
     );
@@ -114,6 +131,7 @@ void createWalls(ecs::World& world) {
         BounceCollision { },
         Position { WINDOW_WIDTH / 2, 0 },
         Rectangle { WINDOW_WIDTH, BOARD_BORDER },
+        style,
         Visible { },
         Wall { }
     );

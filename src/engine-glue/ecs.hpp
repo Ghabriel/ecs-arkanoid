@@ -5,6 +5,7 @@
 #include "../components/Link.hpp"
 #include "../components/Position.hpp"
 #include "../components/Rectangle.hpp"
+#include "../components/Style.hpp"
 #include "../components/Tags.hpp"
 #include "../components/Velocity.hpp"
 #include "../engine/ecs/include.hpp"
@@ -21,6 +22,7 @@ namespace ecs {
         Paddle,
         Position,
         Rectangle,
+        Style,
         Velocity,
         Visible,
         Wall

@@ -14,7 +14,6 @@ namespace constants {
 
     constexpr float BRICK_WIDTH = 55;
     constexpr float BRICK_HEIGHT = 20;
-    constexpr float BRICK_BORDER_WIDTH = 1;
 
     constexpr float BOARD_BORDER = 15;
 }
