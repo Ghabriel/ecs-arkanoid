@@ -29,6 +29,12 @@ namespace ecs {
         void deleteEntity(Entity);
 
         /**
+         * Deletes all entities and resets the ID generation, effectively
+         * resetting the world.
+         */
+        void clear();
+
+        /**
          * Adds a given T component to an entity.
          */
         template<typename T>
@@ -138,6 +144,16 @@ namespace ecs {
         };
 
         meta::forEachT<typename ECS::ComponentTypes>(fn);
+    }
+
+    template<typename ECS>
+    inline void GenericWorld<ECS>::clear() {
+        auto fn = [this]<typename T>() {
+            entityData<T>(storage).clear();
+        };
+
+        meta::forEachT<typename ECS::ComponentTypes>(fn);
+        storage.nextEntityId = 0;
     }
 
     template<typename ECS>
