@@ -6,6 +6,7 @@ sfml_system = dependency('sfml-system')
 
 src = [
 	'src/systems/collision-handler-system/impl.cpp',
+	'src/systems/collision-system/impl.cpp',
 	'src/systems/input-system/impl.cpp',
 	'src/systems/launching-system/impl.cpp',
 	'src/systems/level-loading-system/impl.cpp',

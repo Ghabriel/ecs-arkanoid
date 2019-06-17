@@ -3,6 +3,7 @@
 #include "../engine-glue/ecs.hpp"
 #include "../engine/state-management/include.hpp"
 #include "../systems/collision-handler-system/include.hpp"
+#include "../systems/collision-system/include.hpp"
 #include "../systems/input-system/include.hpp"
 #include "../systems/launching-system/include.hpp"
 #include "../systems/movement-system/include.hpp"
@@ -38,6 +39,7 @@ class RunningState : public state::State {
         float normalizedElapsedTime = elapsedTimeMicro / 1000000.0;
 
         useInputSystem(world);
+        useCollisionSystem(world, normalizedElapsedTime);
         useMovementSystem(world, normalizedElapsedTime);
     }
 

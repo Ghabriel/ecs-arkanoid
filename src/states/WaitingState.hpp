@@ -2,6 +2,7 @@
 
 #include "../engine-glue/ecs.hpp"
 #include "../engine/state-management/include.hpp"
+#include "../systems/collision-system/include.hpp"
 #include "../systems/input-system/include.hpp"
 #include "../systems/level-loading-system/include.hpp"
 #include "../systems/movement-system/include.hpp"
@@ -42,6 +43,7 @@ class WaitingState : public state::State {
         float normalizedElapsedTime = elapsedTimeMicro / 1000000.0;
 
         useInputSystem(world);
+        useCollisionSystem(world, normalizedElapsedTime);
         useMovementSystem(world, normalizedElapsedTime);
     }
 
