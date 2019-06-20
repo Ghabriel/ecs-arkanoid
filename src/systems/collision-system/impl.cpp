@@ -1,7 +1,6 @@
 #include "include.hpp"
 
 #include <algorithm>
-#include <bitset>
 #include "../../constants.hpp"
 
 struct CircleData {
@@ -81,12 +80,11 @@ void resolveBallPaddleCollisions(
             const Position& paddlePos
         ) {
             RectangleData rectangle { r, paddlePos };
-            std::bitset<2> willCollide;
-            willCollide.set(Axis::X, collides(nextCircleDataX, rectangle));
-            willCollide.set(Axis::Y, collides(nextCircleDataY, rectangle));
+            bool collidesInX = collides(nextCircleDataX, rectangle);
+            bool collidesInY = collides(nextCircleDataY, rectangle);
 
-            if (willCollide.any()) {
-                world.notify<BallCollisionListener>(ballId, paddleId);
+            if (collidesInX || collidesInY) {
+                world.notify<BallPaddleCollisionListener>(ballId, paddleId);
             }
         });
 }
@@ -98,35 +96,26 @@ void resolveBounceCollisions(
     const CircleData& nextCircleDataY,
     Velocity& ballVelocity
 ) {
-    std::bitset<2> collisionAxis;
+    std::vector<metadata::CollisionData> collidedObjects;
 
     world.findAll<BounceCollision>()
         .join<Rectangle>()
         .join<Position>()
-        .mutatingForEach([&](
+        .mutatingForEach([&world, &collidedObjects, &nextCircleDataX, &nextCircleDataY](
             ecs::Entity objectId,
             const Rectangle& r,
             const Position& rectPos
         ) {
             RectangleData rectangle { r, rectPos };
-            std::bitset<2> willCollide;
-            willCollide.set(Axis::X, collides(nextCircleDataX, rectangle));
-            willCollide.set(Axis::Y, collides(nextCircleDataY, rectangle));
+            bool collidesInX = collides(nextCircleDataX, rectangle);
+            bool collidesInY = collides(nextCircleDataY, rectangle);
 
-            collisionAxis |= willCollide;
-
-            if (willCollide.any()) {
-                world.notify<BallCollisionListener>(ballId, objectId);
+            if (collidesInX || collidesInY) {
+                collidedObjects.push_back({ objectId, collidesInX, collidesInY });
             }
         });
 
-    if (collisionAxis[Axis::X]) {
-        ballVelocity.x *= -1;
-    }
-
-    if (collisionAxis[Axis::Y]) {
-        ballVelocity.y *= -1;
-    }
+    world.notify<BallObjectsCollisionListener>(ballId, collidedObjects);
 }
 
 void resolvePaddleCollisions(ecs::World& world, float elapsedTime) {

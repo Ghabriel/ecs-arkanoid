@@ -27,10 +27,22 @@ class RunningState : public state::State {
                 useCollisionHandlerSystem(world, ballId, objectId);
             };
 
-            world.addComponent(collisionListenerId, BallCollisionListener { callback });
+            world.addComponent(collisionListenerId, BallPaddleCollisionListener { callback });
 
             return [this] {
-                world.removeComponent<BallCollisionListener>(collisionListenerId);
+                world.removeComponent<BallPaddleCollisionListener>(collisionListenerId);
+            };
+        });
+
+        useEffect([this] {
+            auto callback = [this](ecs::Entity ballId, const metadata::MultiCollisionData& data) {
+                useCollisionHandlerSystem(world, ballId, data);
+            };
+
+            world.addComponent(collisionListenerId, BallObjectsCollisionListener { callback });
+
+            return [this] {
+                world.removeComponent<BallObjectsCollisionListener>(collisionListenerId);
             };
         });
 

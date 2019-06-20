@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../components/BallCollisionListener.hpp"
+#include "../components/collision-listeners.hpp"
 #include "../components/Circle.hpp"
 #include "../components/GameOverListener.hpp"
 #include "../components/Link.hpp"
@@ -14,7 +14,8 @@
 namespace ecs {
     using ECS = GenericECS<
         Ball,
-        BallCollisionListener,
+        BallPaddleCollisionListener,
+        BallObjectsCollisionListener,
         BounceCollision,
         Brick,
         Circle,

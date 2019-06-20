@@ -1,5 +1,6 @@
 #include "include.hpp"
 
+#include <bitset>
 #include "../../constants.hpp"
 #include "../../helpers/ball-paddle-contact.hpp"
 
@@ -11,19 +12,40 @@ static void handleBrickCollision(ecs::World&, ecs::Entity, ecs::Entity);
 void useCollisionHandlerSystem(
     ecs::World& world,
     ecs::Entity ballId,
-    ecs::Entity objectId
+    ecs::Entity paddleId
 ) {
-    if (world.hasComponent<Paddle>(objectId)) {
-        handlePaddleCollision(world, ballId, objectId);
-        return;
+    handlePaddleCollision(world, ballId, paddleId);
+}
+
+void useCollisionHandlerSystem(
+    ecs::World& world,
+    ecs::Entity ballId,
+    const metadata::MultiCollisionData& collisions
+) {
+    bool collidesInX = false;
+    bool collidesInY = false;
+
+    for (const metadata::CollisionData& collisionData : collisions) {
+        ecs::Entity objectId = collisionData.objectId;
+        if (world.hasComponent<Brick>(objectId)) {
+            handleBrickCollision(world, ballId, objectId);
+        } else {
+            std::cout << "Collision detected with wall " << objectId << '\n';
+        }
+
+        collidesInX = collidesInX || collisionData.collidesInX;
+        collidesInY = collidesInY || collisionData.collidesInY;
     }
 
-    if (world.hasComponent<Brick>(objectId)) {
-        handleBrickCollision(world, ballId, objectId);
-        return;
+    Velocity& ballVelocity = world.getData<Velocity>(ballId);
+
+    if (collidesInX) {
+        ballVelocity.x *= -1;
     }
 
-    std::cout << "Collision detected with wall " << objectId << '\n';
+    if (collidesInY) {
+        ballVelocity.y *= -1;
+    }
 }
 
 void handlePaddleCollision(
