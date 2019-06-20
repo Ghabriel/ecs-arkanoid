@@ -10,6 +10,32 @@
 #include "../systems/movement-system/include.hpp"
 #include "../systems/rendering-system/include.hpp"
 
+template<typename T>
+void useToggleComponentEffect(
+    state::State& state,
+    ecs::World& world,
+    ecs::Entity entity,
+    const T& component
+) {
+    state.useEffect([&world, entity, &component] {
+        world.addComponent(entity, component);
+
+        return [&world, entity] {
+            world.removeComponent<T>(entity);
+        };
+    });
+}
+
+template<typename F, typename... Args>
+auto make_forwarder(F fn, Args&&... fixedArgs) {
+    return [&, fn](auto&&... extraArgs) {
+        fn(
+            std::forward<Args>(fixedArgs)...,
+            std::forward<decltype(extraArgs)>(extraArgs)...
+        );
+    };
+}
+
 class RunningState : public state::State {
  public:
     RunningState(
@@ -22,42 +48,9 @@ class RunningState : public state::State {
     virtual void onEnter() override {
         useLaunchingSystem(world);
 
-        useEffect([this] {
-            auto callback = [this](ecs::Entity ballId, ecs::Entity objectId) {
-                useCollisionHandlerSystem(world, ballId, objectId);
-            };
-
-            world.addComponent(collisionListenerId, BallPaddleCollisionListener { callback });
-
-            return [this] {
-                world.removeComponent<BallPaddleCollisionListener>(collisionListenerId);
-            };
-        });
-
-        useEffect([this] {
-            auto callback = [this](ecs::Entity ballId, const metadata::MultiCollisionData& data) {
-                useCollisionHandlerSystem(world, ballId, data);
-            };
-
-            world.addComponent(collisionListenerId, BallObjectsCollisionListener { callback });
-
-            return [this] {
-                world.removeComponent<BallObjectsCollisionListener>(collisionListenerId);
-            };
-        });
-
-        useEffect([this] {
-            auto callback = [this] {
-                world.clear();
-                stateMachine.pushState("waiting");
-            };
-
-            world.addComponent(collisionListenerId, GameOverListener { callback });
-
-            return [this] {
-                world.removeComponent<GameOverListener>(collisionListenerId);
-            };
-        });
+        listenToPaddleCollisions();
+        listenToBounceCollisions();
+        listenToGameOver();
     }
 
     virtual void update(const sf::Time& elapsedTime) override {
@@ -78,4 +71,40 @@ class RunningState : public state::State {
     ecs::World& world;
     state::StateMachine& stateMachine;
     ecs::Entity collisionListenerId;
+
+    void listenToPaddleCollisions() {
+        auto callback = make_forwarder(usePaddleCollisionHandlerSystem, world);
+
+        useToggleComponentEffect(
+            *this,
+            world,
+            collisionListenerId,
+            BallPaddleCollisionListener { callback }
+        );
+    }
+
+    void listenToBounceCollisions() {
+        auto callback = make_forwarder(useBounceCollisionHandlerSystem, world);
+
+        useToggleComponentEffect(
+            *this,
+            world,
+            collisionListenerId,
+            BallObjectsCollisionListener { callback }
+        );
+    }
+
+    void listenToGameOver() {
+        auto callback = [this] {
+            world.clear();
+            stateMachine.pushState("waiting");
+        };
+
+        useToggleComponentEffect(
+            *this,
+            world,
+            collisionListenerId,
+            GameOverListener { callback }
+        );
+    }
 };

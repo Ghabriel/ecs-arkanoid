@@ -9,7 +9,7 @@
 static void handlePaddleCollision(ecs::World&, ecs::Entity, ecs::Entity);
 static void handleBrickCollision(ecs::World&, ecs::Entity, ecs::Entity);
 
-void useCollisionHandlerSystem(
+void usePaddleCollisionHandlerSystem(
     ecs::World& world,
     ecs::Entity ballId,
     ecs::Entity paddleId
@@ -17,7 +17,7 @@ void useCollisionHandlerSystem(
     handlePaddleCollision(world, ballId, paddleId);
 }
 
-void useCollisionHandlerSystem(
+void useBounceCollisionHandlerSystem(
     ecs::World& world,
     ecs::Entity ballId,
     const metadata::MultiCollisionData& collisions

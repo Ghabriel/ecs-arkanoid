@@ -21,7 +21,6 @@ namespace state {
             }
         }
 
-     protected:
         template<typename F>
         void useEffect(F fn) {
             auto cleanupFn = fn();
