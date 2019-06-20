@@ -3,7 +3,6 @@
 #include <algorithm>
 #include <bitset>
 #include "../../constants.hpp"
-#include "../../helpers/ball-paddle-contact.hpp"
 
 struct CircleData {
     const Circle& body;
@@ -24,10 +23,9 @@ static void resolveBallCollisions(ecs::World&, float);
 static void resolveBallPaddleCollisions(
     ecs::World&,
     ecs::Entity,
-    const Position&,
     const CircleData&,
     const CircleData&,
-    Velocity&
+    const Velocity&
 );
 static void resolveBounceCollisions(
     ecs::World&,
@@ -62,7 +60,7 @@ void resolveBallCollisions(ecs::World& world, float elapsedTime) {
             CircleData nextCircleDataX { c, nextPositionX };
             CircleData nextCircleDataY { c, nextPositionY };
 
-            resolveBallPaddleCollisions(world, ballId, ballPos, nextCircleDataX, nextCircleDataY, v);
+            resolveBallPaddleCollisions(world, ballId, nextCircleDataX, nextCircleDataY, v);
             resolveBounceCollisions(world, ballId, nextCircleDataX, nextCircleDataY, v);
         });
 }
@@ -70,10 +68,9 @@ void resolveBallCollisions(ecs::World& world, float elapsedTime) {
 void resolveBallPaddleCollisions(
     ecs::World& world,
     ecs::Entity ballId,
-    const Position& ballPos,
     const CircleData& nextCircleDataX,
     const CircleData& nextCircleDataY,
-    Velocity& ballVelocity
+    const Velocity& ballVelocity
 ) {
     world.findAll<Paddle>()
         .join<Rectangle>()
@@ -89,7 +86,6 @@ void resolveBallPaddleCollisions(
             willCollide.set(Axis::Y, collides(nextCircleDataY, rectangle));
 
             if (willCollide.any()) {
-                ballVelocity = getBallNewVelocity(ballPos, paddlePos);
                 world.notify<BallCollisionListener>(ballId, paddleId);
             }
         });

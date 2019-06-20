@@ -32,6 +32,9 @@ void handlePaddleCollision(
     ecs::Entity paddleId
 ) {
     std::cout << "Collision detected with Paddle\n";
+    const Position& ballPos = world.getData<Position>(ballId);
+    const Position& paddlePos = world.getData<Position>(paddleId);
+    world.getData<Velocity>(ballId) = getBallNewVelocity(ballPos, paddlePos);
 }
 
 void handleBrickCollision(
