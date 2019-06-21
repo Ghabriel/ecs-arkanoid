@@ -3,29 +3,35 @@
 #include <algorithm>
 #include "../../helpers/aggregate-data.hpp"
 
-static void resolveBallCollisions(ecs::World&, float);
-static void resolveBallPaddleCollisions(
+static void detectBallCollisions(ecs::World&, float);
+static void detectBallPaddleCollisions(
     ecs::World&,
     ecs::Entity,
     const CircleData&,
     const CircleData&
 );
-static void resolveBounceCollisions(
+static void detectBounceCollisions(
     ecs::World&,
     ecs::Entity,
     const CircleData&,
     const CircleData&
 );
-static void resolvePaddleCollisions(ecs::World&, float);
+static void detectPaddleCollisions(ecs::World&, float);
+static void detectPaddleWallCollisions(
+    ecs::World&,
+    ecs::Entity,
+    const RectangleData&,
+    const Velocity&
+);
 static bool collides(const CircleData&, const RectangleData&);
 static bool collides(const RectangleData&, const Velocity&, const RectangleData&);
 
 void useCollisionSystem(ecs::World& world, float elapsedTime) {
-    resolveBallCollisions(world, elapsedTime);
-    resolvePaddleCollisions(world, elapsedTime);
+    detectBallCollisions(world, elapsedTime);
+    detectPaddleCollisions(world, elapsedTime);
 }
 
-void resolveBallCollisions(ecs::World& world, float elapsedTime) {
+void detectBallCollisions(ecs::World& world, float elapsedTime) {
     world.findAll<Ball>()
         .join<Circle>()
         .join<Position>()
@@ -39,19 +45,19 @@ void resolveBallCollisions(ecs::World& world, float elapsedTime) {
             Velocity velocity = v * elapsedTime;
             Position nextPositionX { ballPos.x + velocity.x, ballPos.y };
             Position nextPositionY { ballPos.x, ballPos.y + velocity.y };
-            CircleData nextCircleDataX { c, nextPositionX };
-            CircleData nextCircleDataY { c, nextPositionY };
+            CircleData nextBallDataX { c, nextPositionX };
+            CircleData nextBallDataY { c, nextPositionY };
 
-            resolveBallPaddleCollisions(world, ballId, nextCircleDataX, nextCircleDataY);
-            resolveBounceCollisions(world, ballId, nextCircleDataX, nextCircleDataY);
+            detectBallPaddleCollisions(world, ballId, nextBallDataX, nextBallDataY);
+            detectBounceCollisions(world, ballId, nextBallDataX, nextBallDataY);
         });
 }
 
-void resolveBallPaddleCollisions(
+void detectBallPaddleCollisions(
     ecs::World& world,
     ecs::Entity ballId,
-    const CircleData& nextCircleDataX,
-    const CircleData& nextCircleDataY
+    const CircleData& nextBallDataX,
+    const CircleData& nextBallDataY
 ) {
     world.findAll<Paddle>()
         .join<Rectangle>()
@@ -62,8 +68,8 @@ void resolveBallPaddleCollisions(
             const Position& paddlePos
         ) {
             RectangleData rectangle { r, paddlePos };
-            bool collidesInX = collides(nextCircleDataX, rectangle);
-            bool collidesInY = collides(nextCircleDataY, rectangle);
+            bool collidesInX = collides(nextBallDataX, rectangle);
+            bool collidesInY = collides(nextBallDataY, rectangle);
 
             if (collidesInX || collidesInY) {
                 world.notify<BallPaddleCollisionListener>(ballId, paddleId);
@@ -71,25 +77,25 @@ void resolveBallPaddleCollisions(
         });
 }
 
-void resolveBounceCollisions(
+void detectBounceCollisions(
     ecs::World& world,
     ecs::Entity ballId,
-    const CircleData& nextCircleDataX,
-    const CircleData& nextCircleDataY
+    const CircleData& nextBallDataX,
+    const CircleData& nextBallDataY
 ) {
     std::vector<metadata::CollisionData> collidedObjects;
 
     world.findAll<BounceCollision>()
         .join<Rectangle>()
         .join<Position>()
-        .forEach([&world, &collidedObjects, &nextCircleDataX, &nextCircleDataY](
+        .forEach([&world, &collidedObjects, &nextBallDataX, &nextBallDataY](
             ecs::Entity objectId,
             const Rectangle& r,
             const Position& rectPos
         ) {
             RectangleData rectangle { r, rectPos };
-            bool collidesInX = collides(nextCircleDataX, rectangle);
-            bool collidesInY = collides(nextCircleDataY, rectangle);
+            bool collidesInX = collides(nextBallDataX, rectangle);
+            bool collidesInY = collides(nextBallDataY, rectangle);
 
             if (collidesInX || collidesInY) {
                 collidedObjects.push_back({ objectId, collidesInX, collidesInY });
@@ -99,7 +105,7 @@ void resolveBounceCollisions(
     world.notify<BallObjectsCollisionListener>(ballId, collidedObjects);
 }
 
-void resolvePaddleCollisions(ecs::World& world, float elapsedTime) {
+void detectPaddleCollisions(ecs::World& world, float elapsedTime) {
     world.findAll<Paddle>()
         .join<Rectangle>()
         .join<Position>()
@@ -108,32 +114,40 @@ void resolvePaddleCollisions(ecs::World& world, float elapsedTime) {
             ecs::Entity paddleId,
             const Rectangle& paddleBody,
             const Position& paddlePos,
-            const Velocity& paddleVelocity
+            const Velocity& v
         ) {
             RectangleData paddle { paddleBody, paddlePos };
-            Velocity velocity = paddleVelocity * elapsedTime;
+            Velocity paddleVelocity = v * elapsedTime;
 
-            world.findAll<Wall>()
-                .join<Rectangle>()
-                .join<Position>()
-                .forEach([&](
-                    ecs::Entity wallId,
-                    const Rectangle& r,
-                    const Position& rectPos
-                ) {
-                    RectangleData wall { r, rectPos };
+            detectPaddleWallCollisions(world, paddleId, paddle, paddleVelocity);
+        });
+}
 
-                    if (collides(paddle, velocity, wall)) {
-                        world.notify<PaddleWallCollisionListener>(paddleId, wallId);
-                    }
-                });
+void detectPaddleWallCollisions(
+    ecs::World& world,
+    ecs::Entity paddleId,
+    const RectangleData& paddle,
+    const Velocity& paddleVelocity
+) {
+    world.findAll<Wall>()
+        .join<Rectangle>()
+        .join<Position>()
+        .forEach([&world, &paddleId, &paddle, &paddleVelocity](
+            ecs::Entity wallId,
+            const Rectangle& r,
+            const Position& rectPos
+        ) {
+            RectangleData wall { r, rectPos };
+
+            if (collides(paddle, paddleVelocity, wall)) {
+                world.notify<PaddleWallCollisionListener>(paddleId, wallId);
+            }
         });
 }
 
 bool collides(const CircleData& c, const RectangleData& r) {
     const auto& [circle, circlePos] = c;
     const auto& [rectangle, rectPos] = r;
-    //{}
 
     float rectLeftX = rectPos.x - rectangle.width / 2;
     float rectRightX = rectPos.x + rectangle.width / 2;
