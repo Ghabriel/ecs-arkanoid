@@ -69,27 +69,27 @@ class RunningState : public state::EffectState {
     }
 
     void listenToBallPaddleCollisions() {
-        auto callback = partialApply(useBallPaddleCollisionSystem, world);
+        auto callback = partialApply(useCollisionSystem<Ball, Paddle>, world);
         useToggleComponentEffect(listenerId, CollisionListener<Ball, Paddle> { callback });
     }
 
     void listenToBallBrickCollisions() {
-        auto callback = partialApply(useBallBrickCollisionSystem, world);
+        auto callback = partialApply(useCollisionSystem<Ball, Brick>, world);
         useToggleComponentEffect(listenerId, CollisionListener<Ball, Brick> { callback });
     }
 
     void listenToBallWallCollisions() {
-        auto callback = partialApply(useBallWallCollisionSystem, world);
+        auto callback = partialApply(useCollisionSystem<Ball, Wall>, world);
         useToggleComponentEffect(listenerId, CollisionListener<Ball, Wall> { callback });
     }
 
     void listenToPaddlePowerUpCollisions() {
-        auto callback = partialApply(usePaddlePowerUpCollisionSystem, world);
+        auto callback = partialApply(useCollisionSystem<Paddle, PowerUp>, world);
         useToggleComponentEffect(listenerId, CollisionListener<Paddle, PowerUp> { callback });
     }
 
     void listenToPaddleWallCollisions() {
-        auto callback = partialApply(usePaddleWallCollisionSystem, world);
+        auto callback = partialApply(useCollisionSystem<Paddle, Wall>, world);
         useToggleComponentEffect(listenerId, CollisionListener<Paddle, Wall> { callback });
     }
 

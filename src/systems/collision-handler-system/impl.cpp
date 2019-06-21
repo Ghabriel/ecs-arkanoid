@@ -19,10 +19,11 @@ static void handleBounceCollisions(
 static bool handleBallBrickCollision(ecs::World&, ecs::Entity, ecs::Entity);
 static bool handleBallWallCollision(ecs::World&, ecs::Entity, ecs::Entity);
 
-void useBallPaddleCollisionSystem(
+template<>
+void useCollisionSystem<Ball, Paddle>(
     ecs::World& world,
     ecs::Entity ballId,
-    const std::vector<ecs::Entity>& paddleIds
+    metadata::CollisionData<Ball, Paddle> paddleIds
 ) {
     for (ecs::Entity paddleId : paddleIds) {
         std::cout << "Collision detected with Paddle\n";
@@ -32,10 +33,11 @@ void useBallPaddleCollisionSystem(
     }
 }
 
-void useBallBrickCollisionSystem(
+template<>
+void useCollisionSystem<Ball, Brick>(
     ecs::World& world,
     ecs::Entity ballId,
-    const metadata::MultiRectCollisionData& collisions
+    metadata::CollisionData<Ball, Brick> collisions
 ) {
     handleBounceCollisions(
         world,
@@ -47,10 +49,11 @@ void useBallBrickCollisionSystem(
     );
 }
 
-void useBallWallCollisionSystem(
+template<>
+void useCollisionSystem<Ball, Wall>(
     ecs::World& world,
     ecs::Entity ballId,
-    const metadata::MultiRectCollisionData& collisions
+    metadata::CollisionData<Ball, Wall> collisions
 ) {
     handleBounceCollisions(
         world,
@@ -62,10 +65,11 @@ void useBallWallCollisionSystem(
     );
 }
 
-void usePaddlePowerUpCollisionSystem(
+template<>
+void useCollisionSystem<Paddle, PowerUp>(
     ecs::World& world,
     ecs::Entity paddleId,
-    const std::vector<ecs::Entity>& powerUpIds
+    metadata::CollisionData<Paddle, PowerUp> powerUpIds
 ) {
     for (ecs::Entity powerUpId : powerUpIds) {
         std::cout << "Collision detected between Paddle and PowerUp " << powerUpId << "\n";
@@ -78,10 +82,11 @@ void usePaddlePowerUpCollisionSystem(
     }
 }
 
-void usePaddleWallCollisionSystem(
+template<>
+void useCollisionSystem<Paddle, Wall>(
     ecs::World& world,
     ecs::Entity paddleId,
-    const std::vector<ecs::Entity>& wallIds
+    metadata::CollisionData<Paddle, Wall> wallIds
 ) {
     assert(wallIds.size() <= 1);
 
@@ -115,6 +120,12 @@ void usePaddleWallCollisionSystem(
     paddlePos += paddleVelocity * minValidT;
     world.removeComponent<Velocity>(paddleId);
 }
+
+template void useCollisionSystem<Ball, Paddle>(ecs::World&, ecs::Entity, metadata::CollisionData<Ball, Paddle>);
+template void useCollisionSystem<Ball, Brick>(ecs::World&, ecs::Entity, metadata::CollisionData<Ball, Brick>);
+template void useCollisionSystem<Ball, Wall>(ecs::World&, ecs::Entity, metadata::CollisionData<Ball, Wall>);
+template void useCollisionSystem<Paddle, PowerUp>(ecs::World&, ecs::Entity, metadata::CollisionData<Paddle, PowerUp>);
+template void useCollisionSystem<Paddle, Wall>(ecs::World&, ecs::Entity, metadata::CollisionData<Paddle, Wall>);
 
 // ----------------------------------------------------
 // Helper functions
