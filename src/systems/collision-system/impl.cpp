@@ -154,20 +154,10 @@ bool collides(
     const Velocity& paddleVelocity,
     const RectangleData& wall
 ) {
-    auto leftX = [](auto& data) { return data.position.x - data.body.width / 2; };
-    auto rightX = [](auto& data) { return data.position.x + data.body.width / 2; };
-    auto topY = [](auto& data) { return data.position.y - data.body.height / 2; };
-    auto bottomY = [](auto& data) { return data.position.y + data.body.height / 2; };
+    bool checkLeft = (wall.rightX() - paddle.leftX()) > paddleVelocity.x;
+    bool checkRight = paddleVelocity.x > (wall.leftX() - paddle.rightX());
+    bool checkTop = (wall.bottomY() - paddle.topY()) > paddleVelocity.y;
+    bool checkBottom = paddleVelocity.y > (wall.topY() - paddle.bottomY());
 
-    float distanceLeft = rightX(wall) - leftX(paddle);
-    float distanceRight = leftX(wall) - rightX(paddle);
-    float distanceTop = bottomY(wall) - topY(paddle);
-    float distanceBottom = topY(wall) - bottomY(paddle);
-
-    float checkLeft = distanceLeft <= paddleVelocity.x;
-    float checkRight = paddleVelocity.x <= distanceRight;
-    float checkTop = distanceTop <= paddleVelocity.y;
-    float checkBottom = paddleVelocity.y <= distanceBottom;
-
-    return !checkLeft && !checkRight && !checkTop && !checkBottom;
+    return checkLeft && checkRight && checkTop && checkBottom;
 }

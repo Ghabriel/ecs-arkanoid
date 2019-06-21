@@ -48,11 +48,6 @@ void useBounceCollisionSystem(
 void usePaddleWallCollisionSystem(ecs::World& world, ecs::Entity paddleId, ecs::Entity wallId) {
     std::cout << "Collision detected between Paddle and Wall " << wallId << "\n";
 
-    auto leftX = [](auto& data) { return data.position.x - data.body.width / 2; };
-    auto rightX = [](auto& data) { return data.position.x + data.body.width / 2; };
-    auto topY = [](auto& data) { return data.position.y - data.body.height / 2; };
-    auto bottomY = [](auto& data) { return data.position.y + data.body.height / 2; };
-
     Rectangle& paddleBody = world.getData<Rectangle>(paddleId);
     Position& paddlePos = world.getData<Position>(paddleId);
     Velocity& paddleVelocity = world.getData<Velocity>(paddleId);
@@ -62,16 +57,11 @@ void usePaddleWallCollisionSystem(ecs::World& world, ecs::Entity paddleId, ecs::
     const Position& wallPos = world.getData<Position>(wallId);
     RectangleData wall { wallBody, wallPos };
 
-    float distanceLeft = rightX(wall) - leftX(paddle);
-    float distanceRight = leftX(wall) - rightX(paddle);
-    float distanceTop = bottomY(wall) - topY(paddle);
-    float distanceBottom = topY(wall) - bottomY(paddle);
-
     std::array<float, 4> ts {
-        distanceLeft / paddleVelocity.x,
-        distanceRight / paddleVelocity.x,
-        distanceTop / paddleVelocity.y,
-        distanceBottom / paddleVelocity.y
+        (wall.rightX() - paddle.leftX()) / paddleVelocity.x,
+        (wall.leftX() - paddle.rightX()) / paddleVelocity.x,
+        (wall.bottomY() - paddle.topY()) / paddleVelocity.y,
+        (wall.topY() - paddle.bottomY()) / paddleVelocity.y
     };
 
     float minValidT = 1;
