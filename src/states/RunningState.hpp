@@ -32,11 +32,7 @@ class RunningState : public state::EffectState {
     virtual void onEnter() override {
         useLaunchingSystem(world);
 
-        listenToBallPaddleCollisions();
-        listenToBallBrickCollisions();
-        listenToBallWallCollisions();
-        listenToPaddlePowerUpCollisions();
-        listenToPaddleWallCollisions();
+        listenToCollisions();
         listenToGameOver();
     }
 
@@ -62,6 +58,14 @@ class RunningState : public state::EffectState {
     template<typename T>
     void useToggleComponentEffect(ecs::Entity entity, const T& component) {
         EffectState::useToggleComponentEffect(world, entity, component);
+    }
+
+    void listenToCollisions() {
+        listenToBallPaddleCollisions();
+        listenToBallBrickCollisions();
+        listenToBallWallCollisions();
+        listenToPaddlePowerUpCollisions();
+        listenToPaddleWallCollisions();
     }
 
     void listenToBallPaddleCollisions() {
