@@ -88,7 +88,7 @@ void detectBounceCollisions(
     const CircleData& nextBallDataX,
     const CircleData& nextBallDataY
 ) {
-    std::vector<metadata::CollisionData> collidedBricks;
+    std::vector<metadata::RectCollisionData> collidedBricks;
 
     world.findAll<Brick>()
         .join<Rectangle>()
@@ -111,7 +111,7 @@ void detectBounceCollisions(
 
 
 
-    std::vector<metadata::CollisionData> collidedWalls;
+    std::vector<metadata::RectCollisionData> collidedWalls;
 
     world.findAll<Wall>()
         .join<Rectangle>()

@@ -13,7 +13,7 @@ template<typename F>
 static void handleBounceCollisions(
     ecs::World&,
     ecs::Entity,
-    const metadata::MultiCollisionData&,
+    const metadata::MultiRectCollisionData&,
     F
 );
 static bool handleBallBrickCollision(ecs::World&, ecs::Entity, ecs::Entity);
@@ -35,7 +35,7 @@ void useBallPaddleCollisionSystem(
 void useBallBrickCollisionSystem(
     ecs::World& world,
     ecs::Entity ballId,
-    const metadata::MultiCollisionData& collisions
+    const metadata::MultiRectCollisionData& collisions
 ) {
     handleBounceCollisions(
         world,
@@ -50,7 +50,7 @@ void useBallBrickCollisionSystem(
 void useBallWallCollisionSystem(
     ecs::World& world,
     ecs::Entity ballId,
-    const metadata::MultiCollisionData& collisions
+    const metadata::MultiRectCollisionData& collisions
 ) {
     handleBounceCollisions(
         world,
@@ -124,13 +124,13 @@ template<typename F>
 void handleBounceCollisions(
     ecs::World& world,
     ecs::Entity ballId,
-    const metadata::MultiCollisionData& collisions,
+    const metadata::MultiRectCollisionData& collisions,
     F shouldIgnoreCollisionFn
 ) {
     bool collidesInX = false;
     bool collidesInY = false;
 
-    for (const metadata::CollisionData& collisionData : collisions) {
+    for (const metadata::RectCollisionData& collisionData : collisions) {
         if (!shouldIgnoreCollisionFn(world, ballId, collisionData.objectId)) {
             collidesInX = collidesInX || collisionData.collidesInX;
             collidesInY = collidesInY || collisionData.collidesInY;
