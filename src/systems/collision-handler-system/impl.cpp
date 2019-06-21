@@ -121,11 +121,19 @@ void useCollisionSystem<Paddle, Wall>(
     world.removeComponent<Velocity>(paddleId);
 }
 
-template void useCollisionSystem<Ball, Paddle>(ecs::World&, ecs::Entity, metadata::CollisionData<Ball, Paddle>);
-template void useCollisionSystem<Ball, Brick>(ecs::World&, ecs::Entity, metadata::CollisionData<Ball, Brick>);
-template void useCollisionSystem<Ball, Wall>(ecs::World&, ecs::Entity, metadata::CollisionData<Ball, Wall>);
-template void useCollisionSystem<Paddle, PowerUp>(ecs::World&, ecs::Entity, metadata::CollisionData<Paddle, PowerUp>);
-template void useCollisionSystem<Paddle, Wall>(ecs::World&, ecs::Entity, metadata::CollisionData<Paddle, Wall>);
+#define INSTANTIATE(T, U) \
+template void useCollisionSystem<T, U>(\
+    ecs::World&,\
+    ecs::Entity,\
+    metadata::CollisionData<T, U>\
+);
+
+INSTANTIATE(Ball, Paddle);
+INSTANTIATE(Ball, Brick);
+INSTANTIATE(Ball, Wall);
+INSTANTIATE(Paddle, PowerUp);
+INSTANTIATE(Paddle, Wall);
+#undef INSTANTIATE
 
 // ----------------------------------------------------
 // Helper functions
