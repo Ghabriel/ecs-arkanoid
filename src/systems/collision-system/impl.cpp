@@ -214,7 +214,7 @@ void detectPaddleWallCollisions(
         });
 
     if (!collidedWalls.empty()) {
-        world.notify<CollisionListener<Paddle, PowerUp>>(paddleId, collidedWalls);
+        world.notify<CollisionListener<Paddle, Wall>>(paddleId, collidedWalls);
     }
 }
 
