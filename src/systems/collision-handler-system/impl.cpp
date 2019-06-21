@@ -88,7 +88,7 @@ void useCollisionSystem<Paddle, Wall>(
     ecs::Entity paddleId,
     metadata::CollisionData<Paddle, Wall> wallIds
 ) {
-    assert(wallIds.size() <= 1);
+    assert(wallIds.size() == 1);
 
     ecs::Entity wallId = wallIds[0];
     std::cout << "Collision detected between Paddle and Wall " << wallId << "\n";

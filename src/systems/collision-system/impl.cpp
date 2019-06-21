@@ -79,7 +79,9 @@ void detectBallPaddleCollisions(
             }
         });
 
-    world.notify<CollisionListener<Ball, Paddle>>(ballId, collidedPaddles);
+    if (!collidedPaddles.empty()) {
+        world.notify<CollisionListener<Ball, Paddle>>(ballId, collidedPaddles);
+    }
 }
 
 void detectBounceCollisions(
@@ -107,7 +109,9 @@ void detectBounceCollisions(
             }
         });
 
-    world.notify<CollisionListener<Ball, Brick>>(ballId, collidedBricks);
+    if (!collidedBricks.empty()) {
+        world.notify<CollisionListener<Ball, Brick>>(ballId, collidedBricks);
+    }
 
 
 
@@ -130,7 +134,9 @@ void detectBounceCollisions(
             }
         });
 
-    world.notify<CollisionListener<Ball, Wall>>(ballId, collidedWalls);
+    if (!collidedWalls.empty()) {
+        world.notify<CollisionListener<Ball, Wall>>(ballId, collidedWalls);
+    }
 }
 
 void detectPaddleCollisions(ecs::World& world, float elapsedTime) {
@@ -179,7 +185,9 @@ void detectPaddlePowerUpCollisions(
             }
         });
 
-    world.notify<CollisionListener<Paddle, PowerUp>>(paddleId, collidedPowerUps);
+    if (!collidedPowerUps.empty()) {
+        world.notify<CollisionListener<Paddle, PowerUp>>(paddleId, collidedPowerUps);
+    }
 }
 
 void detectPaddleWallCollisions(
@@ -205,7 +213,9 @@ void detectPaddleWallCollisions(
             }
         });
 
-    world.notify<CollisionListener<Paddle, PowerUp>>(paddleId, collidedWalls);
+    if (!collidedWalls.empty()) {
+        world.notify<CollisionListener<Paddle, PowerUp>>(paddleId, collidedWalls);
+    }
 }
 
 bool collides(const CircleData& c, const RectangleData& r) {
