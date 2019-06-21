@@ -60,6 +60,8 @@ void detectBallPaddleCollisions(
     const CircleData& nextBallDataX,
     const CircleData& nextBallDataY
 ) {
+    std::vector<ecs::Entity> collidedPaddles;
+
     world.findAll<Paddle>()
         .join<Rectangle>()
         .join<Position>()
@@ -73,9 +75,11 @@ void detectBallPaddleCollisions(
             bool collidesInY = collides(nextBallDataY, rectangle);
 
             if (collidesInX || collidesInY) {
-                world.notify<BallPaddleCollisionListener>(ballId, paddleId);
+                collidedPaddles.push_back({ paddleId });
             }
         });
+
+    world.notify<CollisionListener<Ball, Paddle>>(ballId, collidedPaddles);
 }
 
 void detectBounceCollisions(
@@ -84,12 +88,12 @@ void detectBounceCollisions(
     const CircleData& nextBallDataX,
     const CircleData& nextBallDataY
 ) {
-    std::vector<metadata::CollisionData> collidedObjects;
+    std::vector<metadata::CollisionData> collidedBricks;
 
-    world.findAll<BounceCollision>()
+    world.findAll<Brick>()
         .join<Rectangle>()
         .join<Position>()
-        .forEach([&world, &collidedObjects, &nextBallDataX, &nextBallDataY](
+        .forEach([&world, &collidedBricks, &nextBallDataX, &nextBallDataY](
             ecs::Entity objectId,
             const Rectangle& r,
             const Position& rectPos
@@ -99,11 +103,34 @@ void detectBounceCollisions(
             bool collidesInY = collides(nextBallDataY, rectangle);
 
             if (collidesInX || collidesInY) {
-                collidedObjects.push_back({ objectId, collidesInX, collidesInY });
+                collidedBricks.push_back({ objectId, collidesInX, collidesInY });
             }
         });
 
-    world.notify<BallObjectsCollisionListener>(ballId, collidedObjects);
+    world.notify<CollisionListener<Ball, Brick>>(ballId, collidedBricks);
+
+
+
+    std::vector<metadata::CollisionData> collidedWalls;
+
+    world.findAll<Wall>()
+        .join<Rectangle>()
+        .join<Position>()
+        .forEach([&world, &collidedWalls, &nextBallDataX, &nextBallDataY](
+            ecs::Entity objectId,
+            const Rectangle& r,
+            const Position& rectPos
+        ) {
+            RectangleData rectangle { r, rectPos };
+            bool collidesInX = collides(nextBallDataX, rectangle);
+            bool collidesInY = collides(nextBallDataY, rectangle);
+
+            if (collidesInX || collidesInY) {
+                collidedWalls.push_back({ objectId, collidesInX, collidesInY });
+            }
+        });
+
+    world.notify<CollisionListener<Ball, Wall>>(ballId, collidedWalls);
 }
 
 void detectPaddleCollisions(ecs::World& world, float elapsedTime) {
@@ -130,11 +157,13 @@ void detectPaddlePowerUpCollisions(
     ecs::Entity paddleId,
     const RectangleData& paddle
 ) {
+    std::vector<ecs::Entity> collidedPowerUps;
+
     world.findAll<PowerUp>()
         .join<Circle>()
         .join<Position>()
         .join<Velocity>()
-        .forEach([&world, paddleId, &paddle](
+        .forEach([&world, paddleId, &paddle, &collidedPowerUps](
             ecs::Entity powerUpId,
             const Circle& powerUpBody,
             const Position& powerUpPos,
@@ -143,9 +172,11 @@ void detectPaddlePowerUpCollisions(
             CircleData powerUp { powerUpBody, powerUpPos };
 
             if (collides(powerUp, paddle)) {
-                world.notify<PaddlePowerUpCollisionListener>(paddleId, powerUpId);
+                collidedPowerUps.push_back({ powerUpId });
             }
         });
+
+    world.notify<CollisionListener<Paddle, PowerUp>>(paddleId, collidedPowerUps);
 }
 
 void detectPaddleWallCollisions(
@@ -154,10 +185,12 @@ void detectPaddleWallCollisions(
     const RectangleData& paddle,
     const Velocity& paddleVelocity
 ) {
+    std::vector<ecs::Entity> collidedWalls;
+
     world.findAll<Wall>()
         .join<Rectangle>()
         .join<Position>()
-        .forEach([&world, &paddleId, &paddle, &paddleVelocity](
+        .forEach([&world, &paddleId, &paddle, &paddleVelocity, &collidedWalls](
             ecs::Entity wallId,
             const Rectangle& r,
             const Position& rectPos
@@ -165,9 +198,11 @@ void detectPaddleWallCollisions(
             RectangleData wall { r, rectPos };
 
             if (collides(paddle, paddleVelocity, wall)) {
-                world.notify<PaddleWallCollisionListener>(paddleId, wallId);
+                collidedWalls.push_back({ wallId });
             }
         });
+
+    world.notify<CollisionListener<Paddle, PowerUp>>(paddleId, collidedWalls);
 }
 
 bool collides(const CircleData& c, const RectangleData& r) {

@@ -1,6 +1,7 @@
 #include "include.hpp"
 
 #include <bitset>
+#include <cassert>
 #include "../../constants.hpp"
 #include "../../engine/misc/check-percentage.hpp"
 #include "../../helpers/aggregate-data.hpp"
@@ -11,11 +12,17 @@
 static bool handleBounceCollision(ecs::World&, ecs::Entity, ecs::Entity);
 static bool handleBallBrickCollision(ecs::World&, ecs::Entity, ecs::Entity);
 
-void useBallPaddleCollisionSystem(ecs::World& world, ecs::Entity ballId, ecs::Entity paddleId) {
-    std::cout << "Collision detected with Paddle\n";
-    const Position& ballPos = world.getData<Position>(ballId);
-    const Position& paddlePos = world.getData<Position>(paddleId);
-    world.getData<Velocity>(ballId) = getBallNewVelocity(ballPos, paddlePos);
+void useBallPaddleCollisionSystem(
+    ecs::World& world,
+    ecs::Entity ballId,
+    const std::vector<ecs::Entity>& paddleIds
+) {
+    for (ecs::Entity paddleId : paddleIds) {
+        std::cout << "Collision detected with Paddle\n";
+        const Position& ballPos = world.getData<Position>(ballId);
+        const Position& paddlePos = world.getData<Position>(paddleId);
+        world.getData<Velocity>(ballId) = getBallNewVelocity(ballPos, paddlePos);
+    }
 }
 
 void useBounceCollisionSystem(
@@ -49,18 +56,27 @@ void useBounceCollisionSystem(
 void usePaddlePowerUpCollisionSystem(
     ecs::World& world,
     ecs::Entity paddleId,
-    ecs::Entity powerUpId
+    const std::vector<ecs::Entity>& powerUpIds
 ) {
-    std::cout << "Collision detected between Paddle and PowerUp " << powerUpId << "\n";
+    for (ecs::Entity powerUpId : powerUpIds) {
+        std::cout << "Collision detected between Paddle and PowerUp " << powerUpId << "\n";
 
-    world.findAll<Ball>()
-        .forEach([&world](ecs::Entity ballId) {
-            std::cout << "Ball is now in piercing mode.\n";
-            world.addComponent(ballId, PiercingBall { });
-        });
+        world.findAll<Ball>()
+            .forEach([&world](ecs::Entity ballId) {
+                std::cout << "Ball is now in piercing mode.\n";
+                world.addComponent(ballId, PiercingBall { });
+            });
+    }
 }
 
-void usePaddleWallCollisionSystem(ecs::World& world, ecs::Entity paddleId, ecs::Entity wallId) {
+void usePaddleWallCollisionSystem(
+    ecs::World& world,
+    ecs::Entity paddleId,
+    const std::vector<ecs::Entity>& wallIds
+) {
+    assert(wallIds.size() <= 1);
+
+    ecs::Entity wallId = wallIds[0];
     std::cout << "Collision detected between Paddle and Wall " << wallId << "\n";
 
     Rectangle& paddleBody = world.getData<Rectangle>(paddleId);

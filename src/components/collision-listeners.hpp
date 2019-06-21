@@ -3,6 +3,7 @@
 #include <functional>
 #include <vector>
 #include "../engine/ecs/ECS.hpp"
+#include "Tags.hpp"
 
 namespace metadata {
     struct CollisionData {
@@ -14,18 +15,17 @@ namespace metadata {
     using MultiCollisionData = std::vector<metadata::CollisionData>;
 }
 
-struct BallPaddleCollisionListener {
-    std::function<void(ecs::Entity, ecs::Entity)> fn;
+template<typename T, typename U>
+struct CollisionListener {
+    std::function<void(ecs::Entity, std::vector<ecs::Entity>)> fn;
 };
 
-struct BallObjectsCollisionListener {
+template<>
+struct CollisionListener<Ball, Brick> {
     std::function<void(ecs::Entity, const metadata::MultiCollisionData&)> fn;
 };
 
-struct PaddlePowerUpCollisionListener {
-    std::function<void(ecs::Entity, ecs::Entity)> fn;
-};
-
-struct PaddleWallCollisionListener {
-    std::function<void(ecs::Entity, ecs::Entity)> fn;
+template<>
+struct CollisionListener<Ball, Wall> {
+    std::function<void(ecs::Entity, const metadata::MultiCollisionData&)> fn;
 };
