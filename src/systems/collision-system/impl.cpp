@@ -17,6 +17,7 @@ static void detectBounceCollisions(
     const CircleData&
 );
 static void detectPaddleCollisions(ecs::World&, float);
+static void detectPaddlePowerUpCollisions(ecs::World&, ecs::Entity, const RectangleData&);
 static void detectPaddleWallCollisions(
     ecs::World&,
     ecs::Entity,
@@ -119,7 +120,31 @@ void detectPaddleCollisions(ecs::World& world, float elapsedTime) {
             RectangleData paddle { paddleBody, paddlePos };
             Velocity paddleVelocity = v * elapsedTime;
 
+            detectPaddlePowerUpCollisions(world, paddleId, paddle);
             detectPaddleWallCollisions(world, paddleId, paddle, paddleVelocity);
+        });
+}
+
+void detectPaddlePowerUpCollisions(
+    ecs::World& world,
+    ecs::Entity paddleId,
+    const RectangleData& paddle
+) {
+    world.findAll<PowerUp>()
+        .join<Circle>()
+        .join<Position>()
+        .join<Velocity>()
+        .forEach([&world, paddleId, &paddle](
+            ecs::Entity powerUpId,
+            const Circle& powerUpBody,
+            const Position& powerUpPos,
+            const Velocity& powerUpVelocity
+        ) {
+            CircleData powerUp { powerUpBody, powerUpPos };
+
+            if (collides(powerUp, paddle)) {
+                world.notify<PaddlePowerUpCollisionListener>(paddleId, powerUpId);
+            }
         });
 }
 

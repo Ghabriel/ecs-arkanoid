@@ -34,6 +34,7 @@ class RunningState : public state::EffectState {
 
         listenToBallPaddleCollisions();
         listenToBounceCollisions();
+        listenToPaddlePowerUpCollisions();
         listenToPaddleWallCollisions();
         listenToGameOver();
     }
@@ -70,6 +71,11 @@ class RunningState : public state::EffectState {
     void listenToBounceCollisions() {
         auto callback = partialApply(useBounceCollisionSystem, world);
         useToggleComponentEffect(listenerId, BallObjectsCollisionListener { callback });
+    }
+
+    void listenToPaddlePowerUpCollisions() {
+        auto callback = partialApply(usePaddlePowerUpCollisionSystem, world);
+        useToggleComponentEffect(listenerId, PaddlePowerUpCollisionListener { callback });
     }
 
     void listenToPaddleWallCollisions() {

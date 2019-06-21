@@ -5,6 +5,7 @@
 #include "../components/GameOverListener.hpp"
 #include "../components/Link.hpp"
 #include "../components/Position.hpp"
+#include "../components/powerups.hpp"
 #include "../components/Rectangle.hpp"
 #include "../components/Style.hpp"
 #include "../components/Tags.hpp"
@@ -23,8 +24,11 @@ namespace ecs {
         Input,
         Link,
         Paddle,
+        PaddlePowerUpCollisionListener,
         PaddleWallCollisionListener,
+        PiercingBall,
         Position,
+        PowerUp,
         Rectangle,
         Style,
         Velocity,

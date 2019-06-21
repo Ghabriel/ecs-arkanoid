@@ -16,4 +16,7 @@ namespace constants {
     constexpr float BRICK_HEIGHT = 20;
 
     constexpr float BOARD_BORDER = 15;
+
+    constexpr float POWERUP_RADIUS = 10;
+    constexpr float POWERUP_VELOCITY = 100;
 }

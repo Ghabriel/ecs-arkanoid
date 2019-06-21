@@ -1,13 +1,16 @@
 #include "include.hpp"
 
 #include <bitset>
+#include <random>
 #include "../../constants.hpp"
 #include "../../helpers/aggregate-data.hpp"
 #include "../../helpers/ball-paddle-contact.hpp"
 
 #include <iostream>
 
-static void handleBounceCollision(ecs::World&, ecs::Entity, ecs::Entity);
+static bool handleBounceCollision(ecs::World&, ecs::Entity, ecs::Entity);
+static bool handleBallBrickCollision(ecs::World&, ecs::Entity, ecs::Entity);
+bool checkPercentage(int percentage);
 
 void useBallPaddleCollisionSystem(ecs::World& world, ecs::Entity ballId, ecs::Entity paddleId) {
     std::cout << "Collision detected with Paddle\n";
@@ -25,10 +28,12 @@ void useBounceCollisionSystem(
     bool collidesInY = false;
 
     for (const metadata::CollisionData& collisionData : collisions) {
-        handleBounceCollision(world, ballId, collisionData.objectId);
+        bool ignoreCollision = handleBounceCollision(world, ballId, collisionData.objectId);
 
-        collidesInX = collidesInX || collisionData.collidesInX;
-        collidesInY = collidesInY || collisionData.collidesInY;
+        if (!ignoreCollision) {
+            collidesInX = collidesInX || collisionData.collidesInX;
+            collidesInY = collidesInY || collisionData.collidesInY;
+        }
     }
 
     Velocity& ballVelocity = world.getData<Velocity>(ballId);
@@ -40,6 +45,20 @@ void useBounceCollisionSystem(
     if (collidesInY) {
         ballVelocity.y *= -1;
     }
+}
+
+void usePaddlePowerUpCollisionSystem(
+    ecs::World& world,
+    ecs::Entity paddleId,
+    ecs::Entity powerUpId
+) {
+    std::cout << "Collision detected between Paddle and PowerUp " << powerUpId << "\n";
+
+    world.findAll<Ball>()
+        .forEach([&world](ecs::Entity ballId) {
+            std::cout << "Ball is now in piercing mode.\n";
+            world.addComponent(ballId, PiercingBall { });
+        });
 }
 
 void usePaddleWallCollisionSystem(ecs::World& world, ecs::Entity paddleId, ecs::Entity wallId) {
@@ -71,17 +90,57 @@ void usePaddleWallCollisionSystem(ecs::World& world, ecs::Entity paddleId, ecs::
 
     paddlePos += paddleVelocity * minValidT;
     world.removeComponent<Velocity>(paddleId);
-}
+ }
 
-void handleBounceCollision(
+bool handleBounceCollision(
     ecs::World& world,
     ecs::Entity ballId,
     ecs::Entity objectId
 ) {
     if (world.hasComponent<Brick>(objectId)) {
-        std::cout << "Collision detected with brick " << objectId << '\n';
-        world.deleteEntity(objectId);
+        return handleBallBrickCollision(world, ballId, objectId);
     } else {
         std::cout << "Collision detected with wall " << objectId << '\n';
+        return false;
     }
- }
+}
+
+bool handleBallBrickCollision(
+    ecs::World& world,
+    ecs::Entity ballId,
+    ecs::Entity brickId
+) {
+    std::cout << "Collision detected with brick " << brickId << '\n';
+
+    if (world.hasComponent<PiercingBall>(ballId)) {
+        world.deleteEntity(brickId);
+        return true;
+    }
+
+    if (checkPercentage(50)) {
+        using constants::POWERUP_RADIUS;
+        using constants::POWERUP_VELOCITY;
+
+        const Position& brickPos = world.getData<Position>(brickId);
+
+        world.createEntity(
+            Circle { POWERUP_RADIUS },
+            brickPos,
+            PowerUp { },
+            Style { sf::Color::Red, sf::Color::Blue, 2 },
+            Velocity { 0, POWERUP_VELOCITY },
+            Visible { }
+        );
+    }
+
+    world.deleteEntity(brickId);
+    return false;
+}
+
+bool checkPercentage(int percentage) {
+    static std::random_device randomDevice;
+    static std::mt19937 gen(randomDevice());
+    static std::uniform_int_distribution<> distribution(1, 100);
+
+    return distribution(gen) <= percentage;
+}
