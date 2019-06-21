@@ -137,18 +137,21 @@ void detectPaddleCollisions(ecs::World& world, float elapsedTime) {
     world.findAll<Paddle>()
         .join<Rectangle>()
         .join<Position>()
-        .join<Velocity>()
         .forEach([&world, elapsedTime](
             ecs::Entity paddleId,
             const Rectangle& paddleBody,
-            const Position& paddlePos,
-            const Velocity& v
+            const Position& paddlePos
         ) {
             RectangleData paddle { paddleBody, paddlePos };
-            Velocity paddleVelocity = v * elapsedTime;
 
             detectPaddlePowerUpCollisions(world, paddleId, paddle);
-            detectPaddleWallCollisions(world, paddleId, paddle, paddleVelocity);
+
+            if (world.hasComponent<Velocity>(paddleId)) {
+                const Velocity& v = world.getData<Velocity>(paddleId);
+                Velocity paddleVelocity = v * elapsedTime;
+
+                detectPaddleWallCollisions(world, paddleId, paddle, paddleVelocity);
+            }
         });
 }
 
