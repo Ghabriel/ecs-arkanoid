@@ -11,7 +11,7 @@
 #include "../systems/rendering-system/include.hpp"
 
 template<typename F, typename... Args>
-auto make_forwarder(F fn, Args&&... fixedArgs) {
+auto partialApply(F fn, Args&&... fixedArgs) {
     return [&, fn](auto&&... extraArgs) {
         fn(
             std::forward<Args>(fixedArgs)...,
@@ -26,7 +26,7 @@ class RunningState : public state::EffectState {
         ecs::World& world,
         state::StateMachine& stateMachine
     ) : world(world), stateMachine(stateMachine) {
-        collisionListenerId = world.createEntity();
+        listenerId = world.createEntity();
     }
 
     virtual void onEnter() override {
@@ -54,26 +54,21 @@ class RunningState : public state::EffectState {
  private:
     ecs::World& world;
     state::StateMachine& stateMachine;
-    ecs::Entity collisionListenerId;
+    ecs::Entity listenerId;
+
+    template<typename T>
+    void useToggleComponentEffect(ecs::Entity entity, const T& component) {
+        EffectState::useToggleComponentEffect(world, entity, component);
+    }
 
     void listenToPaddleCollisions() {
-        auto callback = make_forwarder(usePaddleCollisionHandlerSystem, world);
-
-        useToggleComponentEffect(
-            world,
-            collisionListenerId,
-            BallPaddleCollisionListener { callback }
-        );
+        auto callback = partialApply(usePaddleCollisionHandlerSystem, world);
+        useToggleComponentEffect(listenerId, BallPaddleCollisionListener { callback });
     }
 
     void listenToBounceCollisions() {
-        auto callback = make_forwarder(useBounceCollisionHandlerSystem, world);
-
-        useToggleComponentEffect(
-            world,
-            collisionListenerId,
-            BallObjectsCollisionListener { callback }
-        );
+        auto callback = partialApply(useBounceCollisionHandlerSystem, world);
+        useToggleComponentEffect(listenerId, BallObjectsCollisionListener { callback });
     }
 
     void listenToGameOver() {
@@ -82,10 +77,6 @@ class RunningState : public state::EffectState {
             stateMachine.pushState("waiting");
         };
 
-        useToggleComponentEffect(
-            world,
-            collisionListenerId,
-            GameOverListener { callback }
-        );
+        useToggleComponentEffect(listenerId, GameOverListener { callback });
     }
 };
