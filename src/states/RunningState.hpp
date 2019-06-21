@@ -33,7 +33,8 @@ class RunningState : public state::EffectState {
         useLaunchingSystem(world);
 
         listenToBallPaddleCollisions();
-        listenToBounceCollisions();
+        listenToBallBrickCollisions();
+        listenToBallWallCollisions();
         listenToPaddlePowerUpCollisions();
         listenToPaddleWallCollisions();
         listenToGameOver();
@@ -68,9 +69,13 @@ class RunningState : public state::EffectState {
         useToggleComponentEffect(listenerId, CollisionListener<Ball, Paddle> { callback });
     }
 
-    void listenToBounceCollisions() {
-        auto callback = partialApply(useBounceCollisionSystem, world);
+    void listenToBallBrickCollisions() {
+        auto callback = partialApply(useBallBrickCollisionSystem, world);
         useToggleComponentEffect(listenerId, CollisionListener<Ball, Brick> { callback });
+    }
+
+    void listenToBallWallCollisions() {
+        auto callback = partialApply(useBallWallCollisionSystem, world);
         useToggleComponentEffect(listenerId, CollisionListener<Ball, Wall> { callback });
     }
 

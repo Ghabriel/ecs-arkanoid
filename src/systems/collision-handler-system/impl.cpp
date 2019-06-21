@@ -9,8 +9,15 @@
 
 #include <iostream>
 
-static bool handleBounceCollision(ecs::World&, ecs::Entity, ecs::Entity);
+template<typename F>
+static void handleBounceCollisions(
+    ecs::World&,
+    ecs::Entity,
+    const metadata::MultiCollisionData&,
+    F
+);
 static bool handleBallBrickCollision(ecs::World&, ecs::Entity, ecs::Entity);
+static bool handleBallWallCollision(ecs::World&, ecs::Entity, ecs::Entity);
 
 void useBallPaddleCollisionSystem(
     ecs::World& world,
@@ -25,32 +32,34 @@ void useBallPaddleCollisionSystem(
     }
 }
 
-void useBounceCollisionSystem(
+void useBallBrickCollisionSystem(
     ecs::World& world,
     ecs::Entity ballId,
     const metadata::MultiCollisionData& collisions
 ) {
-    bool collidesInX = false;
-    bool collidesInY = false;
-
-    for (const metadata::CollisionData& collisionData : collisions) {
-        bool ignoreCollision = handleBounceCollision(world, ballId, collisionData.objectId);
-
-        if (!ignoreCollision) {
-            collidesInX = collidesInX || collisionData.collidesInX;
-            collidesInY = collidesInY || collisionData.collidesInY;
+    handleBounceCollisions(
+        world,
+        ballId,
+        collisions,
+        [](ecs::World& world, ecs::Entity ballId, ecs::Entity brickId) {
+            return handleBallBrickCollision(world, ballId, brickId);
         }
-    }
+    );
+}
 
-    Velocity& ballVelocity = world.getData<Velocity>(ballId);
-
-    if (collidesInX) {
-        ballVelocity.x *= -1;
-    }
-
-    if (collidesInY) {
-        ballVelocity.y *= -1;
-    }
+void useBallWallCollisionSystem(
+    ecs::World& world,
+    ecs::Entity ballId,
+    const metadata::MultiCollisionData& collisions
+) {
+    handleBounceCollisions(
+        world,
+        ballId,
+        collisions,
+        [](ecs::World& world, ecs::Entity ballId, ecs::Entity wallId) {
+            return handleBallWallCollision(world, ballId, wallId);
+        }
+    );
 }
 
 void usePaddlePowerUpCollisionSystem(
@@ -105,18 +114,37 @@ void usePaddleWallCollisionSystem(
 
     paddlePos += paddleVelocity * minValidT;
     world.removeComponent<Velocity>(paddleId);
- }
+}
 
-bool handleBounceCollision(
+// ----------------------------------------------------
+// Helper functions
+// ----------------------------------------------------
+
+template<typename F>
+void handleBounceCollisions(
     ecs::World& world,
     ecs::Entity ballId,
-    ecs::Entity objectId
+    const metadata::MultiCollisionData& collisions,
+    F shouldIgnoreCollisionFn
 ) {
-    if (world.hasComponent<Brick>(objectId)) {
-        return handleBallBrickCollision(world, ballId, objectId);
-    } else {
-        std::cout << "Collision detected with wall " << objectId << '\n';
-        return false;
+    bool collidesInX = false;
+    bool collidesInY = false;
+
+    for (const metadata::CollisionData& collisionData : collisions) {
+        if (!shouldIgnoreCollisionFn(world, ballId, collisionData.objectId)) {
+            collidesInX = collidesInX || collisionData.collidesInX;
+            collidesInY = collidesInY || collisionData.collidesInY;
+        }
+    }
+
+    Velocity& ballVelocity = world.getData<Velocity>(ballId);
+
+    if (collidesInX) {
+        ballVelocity.x *= -1;
+    }
+
+    if (collidesInY) {
+        ballVelocity.y *= -1;
     }
 }
 
@@ -149,5 +177,14 @@ bool handleBallBrickCollision(
     }
 
     world.deleteEntity(brickId);
+    return false;
+}
+
+bool handleBallWallCollision(
+    ecs::World& world,
+    ecs::Entity ballId,
+    ecs::Entity wallId
+) {
+    std::cout << "Collision detected with wall " << wallId << '\n';
     return false;
 }
