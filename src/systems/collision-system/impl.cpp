@@ -1,7 +1,6 @@
 #include "include.hpp"
 
 #include <algorithm>
-#include "../../constants.hpp"
 
 struct CircleData {
     const Circle& body;
@@ -13,25 +12,18 @@ struct RectangleData {
     const Position& position;
 };
 
-namespace Axis {
-    constexpr size_t X = 0;
-    constexpr size_t Y = 1;
-}
-
 static void resolveBallCollisions(ecs::World&, float);
 static void resolveBallPaddleCollisions(
     ecs::World&,
     ecs::Entity,
     const CircleData&,
-    const CircleData&,
-    const Velocity&
+    const CircleData&
 );
 static void resolveBounceCollisions(
     ecs::World&,
     ecs::Entity,
     const CircleData&,
-    const CircleData&,
-    Velocity&
+    const CircleData&
 );
 static void resolvePaddleCollisions(ecs::World&, float);
 static bool collides(const CircleData&, const RectangleData&);
@@ -51,7 +43,7 @@ void resolveBallCollisions(ecs::World& world, float elapsedTime) {
             ecs::Entity ballId,
             const Circle& c,
             const Position& ballPos,
-            Velocity& v
+            const Velocity& v
         ) {
             Velocity velocity = v * elapsedTime;
             Position nextPositionX { ballPos.x + velocity.x, ballPos.y };
@@ -59,8 +51,8 @@ void resolveBallCollisions(ecs::World& world, float elapsedTime) {
             CircleData nextCircleDataX { c, nextPositionX };
             CircleData nextCircleDataY { c, nextPositionY };
 
-            resolveBallPaddleCollisions(world, ballId, nextCircleDataX, nextCircleDataY, v);
-            resolveBounceCollisions(world, ballId, nextCircleDataX, nextCircleDataY, v);
+            resolveBallPaddleCollisions(world, ballId, nextCircleDataX, nextCircleDataY);
+            resolveBounceCollisions(world, ballId, nextCircleDataX, nextCircleDataY);
         });
 }
 
@@ -68,8 +60,7 @@ void resolveBallPaddleCollisions(
     ecs::World& world,
     ecs::Entity ballId,
     const CircleData& nextCircleDataX,
-    const CircleData& nextCircleDataY,
-    const Velocity& ballVelocity
+    const CircleData& nextCircleDataY
 ) {
     world.findAll<Paddle>()
         .join<Rectangle>()
@@ -93,15 +84,14 @@ void resolveBounceCollisions(
     ecs::World& world,
     ecs::Entity ballId,
     const CircleData& nextCircleDataX,
-    const CircleData& nextCircleDataY,
-    Velocity& ballVelocity
+    const CircleData& nextCircleDataY
 ) {
     std::vector<metadata::CollisionData> collidedObjects;
 
     world.findAll<BounceCollision>()
         .join<Rectangle>()
         .join<Position>()
-        .mutatingForEach([&world, &collidedObjects, &nextCircleDataX, &nextCircleDataY](
+        .forEach([&world, &collidedObjects, &nextCircleDataX, &nextCircleDataY](
             ecs::Entity objectId,
             const Rectangle& r,
             const Position& rectPos
