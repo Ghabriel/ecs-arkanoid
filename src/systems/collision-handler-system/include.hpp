@@ -2,5 +2,6 @@
 
 #include "../../engine-glue/ecs.hpp"
 
-void usePaddleCollisionHandlerSystem(ecs::World&, ecs::Entity, ecs::Entity);
-void useBounceCollisionHandlerSystem(ecs::World&, ecs::Entity, const metadata::MultiCollisionData&);
+void useBallPaddleCollisionSystem(ecs::World&, ecs::Entity, ecs::Entity);
+void useBounceCollisionSystem(ecs::World&, ecs::Entity, const metadata::MultiCollisionData&);
+void usePaddleWallCollisionSystem(ecs::World&, ecs::Entity, ecs::Entity);

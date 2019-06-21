@@ -23,6 +23,7 @@ namespace ecs {
         Input,
         Link,
         Paddle,
+        PaddleWallCollisionListener,
         Position,
         Rectangle,
         Style,

@@ -32,8 +32,9 @@ class RunningState : public state::EffectState {
     virtual void onEnter() override {
         useLaunchingSystem(world);
 
-        listenToPaddleCollisions();
+        listenToBallPaddleCollisions();
         listenToBounceCollisions();
+        listenToPaddleWallCollisions();
         listenToGameOver();
     }
 
@@ -61,14 +62,19 @@ class RunningState : public state::EffectState {
         EffectState::useToggleComponentEffect(world, entity, component);
     }
 
-    void listenToPaddleCollisions() {
-        auto callback = partialApply(usePaddleCollisionHandlerSystem, world);
+    void listenToBallPaddleCollisions() {
+        auto callback = partialApply(useBallPaddleCollisionSystem, world);
         useToggleComponentEffect(listenerId, BallPaddleCollisionListener { callback });
     }
 
     void listenToBounceCollisions() {
-        auto callback = partialApply(useBounceCollisionHandlerSystem, world);
+        auto callback = partialApply(useBounceCollisionSystem, world);
         useToggleComponentEffect(listenerId, BallObjectsCollisionListener { callback });
+    }
+
+    void listenToPaddleWallCollisions() {
+        auto callback = partialApply(usePaddleWallCollisionSystem, world);
+        useToggleComponentEffect(listenerId, PaddleWallCollisionListener { callback });
     }
 
     void listenToGameOver() {

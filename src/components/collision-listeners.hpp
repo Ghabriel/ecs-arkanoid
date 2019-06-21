@@ -21,3 +21,7 @@ struct BallPaddleCollisionListener {
 struct BallObjectsCollisionListener {
     std::function<void(ecs::Entity, const metadata::MultiCollisionData&)> fn;
 };
+
+struct PaddleWallCollisionListener {
+    std::function<void(ecs::Entity, ecs::Entity)> fn;
+};

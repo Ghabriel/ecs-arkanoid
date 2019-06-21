@@ -2,22 +2,19 @@
 
 #include <bitset>
 #include "../../constants.hpp"
+#include "../../helpers/aggregate-data.hpp"
 #include "../../helpers/ball-paddle-contact.hpp"
 
 #include <iostream>
 
-static void handlePaddleCollision(ecs::World&, ecs::Entity, ecs::Entity);
-static void handleBrickCollision(ecs::World&, ecs::Entity, ecs::Entity);
+static void handleBallPaddleCollision(ecs::World&, ecs::Entity, ecs::Entity);
+static void handleBallBrickCollision(ecs::World&, ecs::Entity, ecs::Entity);
 
-void usePaddleCollisionHandlerSystem(
-    ecs::World& world,
-    ecs::Entity ballId,
-    ecs::Entity paddleId
-) {
-    handlePaddleCollision(world, ballId, paddleId);
+void useBallPaddleCollisionSystem(ecs::World& world, ecs::Entity ballId, ecs::Entity paddleId) {
+    handleBallPaddleCollision(world, ballId, paddleId);
 }
 
-void useBounceCollisionHandlerSystem(
+void useBounceCollisionSystem(
     ecs::World& world,
     ecs::Entity ballId,
     const metadata::MultiCollisionData& collisions
@@ -28,7 +25,7 @@ void useBounceCollisionHandlerSystem(
     for (const metadata::CollisionData& collisionData : collisions) {
         ecs::Entity objectId = collisionData.objectId;
         if (world.hasComponent<Brick>(objectId)) {
-            handleBrickCollision(world, ballId, objectId);
+            handleBallBrickCollision(world, ballId, objectId);
         } else {
             std::cout << "Collision detected with wall " << objectId << '\n';
         }
@@ -48,7 +45,48 @@ void useBounceCollisionHandlerSystem(
     }
 }
 
-void handlePaddleCollision(
+void usePaddleWallCollisionSystem(ecs::World& world, ecs::Entity paddleId, ecs::Entity wallId) {
+    std::cout << "Collision detected between Paddle and Wall " << wallId << "\n";
+
+    auto leftX = [](auto& data) { return data.position.x - data.body.width / 2; };
+    auto rightX = [](auto& data) { return data.position.x + data.body.width / 2; };
+    auto topY = [](auto& data) { return data.position.y - data.body.height / 2; };
+    auto bottomY = [](auto& data) { return data.position.y + data.body.height / 2; };
+
+    Rectangle& paddleBody = world.getData<Rectangle>(paddleId);
+    Position& paddlePos = world.getData<Position>(paddleId);
+    Velocity& paddleVelocity = world.getData<Velocity>(paddleId);
+    RectangleData paddle { paddleBody, paddlePos };
+
+    const Rectangle& wallBody = world.getData<Rectangle>(wallId);
+    const Position& wallPos = world.getData<Position>(wallId);
+    RectangleData wall { wallBody, wallPos };
+
+    float distanceLeft = rightX(wall) - leftX(paddle);
+    float distanceRight = leftX(wall) - rightX(paddle);
+    float distanceTop = bottomY(wall) - topY(paddle);
+    float distanceBottom = topY(wall) - bottomY(paddle);
+
+    std::array<float, 4> ts {
+        distanceLeft / paddleVelocity.x,
+        distanceRight / paddleVelocity.x,
+        distanceTop / paddleVelocity.y,
+        distanceBottom / paddleVelocity.y
+    };
+
+    float minValidT = 1;
+
+    for (float t : ts) {
+        if (t >= 0 && t < minValidT) {
+            minValidT = t;
+        }
+    }
+
+    paddlePos += paddleVelocity * minValidT;
+    world.removeComponent<Velocity>(paddleId);
+}
+
+void handleBallPaddleCollision(
     ecs::World& world,
     ecs::Entity ballId,
     ecs::Entity paddleId
@@ -59,7 +97,7 @@ void handlePaddleCollision(
     world.getData<Velocity>(ballId) = getBallNewVelocity(ballPos, paddlePos);
 }
 
-void handleBrickCollision(
+void handleBallBrickCollision(
     ecs::World& world,
     ecs::Entity ballId,
     ecs::Entity brickId

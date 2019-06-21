@@ -1,16 +1,7 @@
 #include "include.hpp"
 
 #include <algorithm>
-
-struct CircleData {
-    const Circle& body;
-    const Position& position;
-};
-
-struct RectangleData {
-    const Rectangle& body;
-    const Position& position;
-};
+#include "../../helpers/aggregate-data.hpp"
 
 static void resolveBallCollisions(ecs::World&, float);
 static void resolveBallPaddleCollisions(
@@ -27,7 +18,7 @@ static void resolveBounceCollisions(
 );
 static void resolvePaddleCollisions(ecs::World&, float);
 static bool collides(const CircleData&, const RectangleData&);
-static bool resolveCollision(const Rectangle&, Position&, const Velocity&, const RectangleData&);
+static bool collides(const RectangleData&, const Velocity&, const RectangleData&);
 
 void useCollisionSystem(ecs::World& world, float elapsedTime) {
     resolveBallCollisions(world, elapsedTime);
@@ -116,24 +107,24 @@ void resolvePaddleCollisions(ecs::World& world, float elapsedTime) {
         .forEach([&world, elapsedTime](
             ecs::Entity paddleId,
             const Rectangle& paddleBody,
-            Position& paddlePos,
-            Velocity& paddleVelocity
+            const Position& paddlePos,
+            const Velocity& paddleVelocity
         ) {
+            RectangleData paddle { paddleBody, paddlePos };
             Velocity velocity = paddleVelocity * elapsedTime;
 
             world.findAll<Wall>()
                 .join<Rectangle>()
                 .join<Position>()
                 .forEach([&](
-                    ecs::Entity objectId,
+                    ecs::Entity wallId,
                     const Rectangle& r,
                     const Position& rectPos
                 ) {
                     RectangleData wall { r, rectPos };
-                    bool collided = resolveCollision(paddleBody, paddlePos, velocity, wall);
 
-                    if (collided) {
-                        world.removeComponent<Velocity>(paddleId);
+                    if (collides(paddle, velocity, wall)) {
+                        world.notify<PaddleWallCollisionListener>(paddleId, wallId);
                     }
                 });
         });
@@ -158,9 +149,8 @@ bool collides(const CircleData& c, const RectangleData& r) {
     return (dx * dx) + (dy * dy) < (circle.radius * circle.radius);
 }
 
-bool resolveCollision(
-    const Rectangle& paddleBody,
-    Position& paddlePos,
+bool collides(
+    const RectangleData& paddle,
     const Velocity& paddleVelocity,
     const RectangleData& wall
 ) {
@@ -168,8 +158,6 @@ bool resolveCollision(
     auto rightX = [](auto& data) { return data.position.x + data.body.width / 2; };
     auto topY = [](auto& data) { return data.position.y - data.body.height / 2; };
     auto bottomY = [](auto& data) { return data.position.y + data.body.height / 2; };
-
-    RectangleData paddle { paddleBody, paddlePos };
 
     float distanceLeft = rightX(wall) - leftX(paddle);
     float distanceRight = leftX(wall) - rightX(paddle);
@@ -181,26 +169,5 @@ bool resolveCollision(
     float checkTop = distanceTop <= paddleVelocity.y;
     float checkBottom = paddleVelocity.y <= distanceBottom;
 
-    if (checkLeft || checkRight || checkTop || checkBottom) {
-        return false;
-    }
-
-    std::array<float, 4> ts {
-        distanceLeft / paddleVelocity.x,
-        distanceRight / paddleVelocity.x,
-        distanceTop / paddleVelocity.y,
-        distanceBottom / paddleVelocity.y
-    };
-
-    float minValidT = 1;
-
-    for (float t : ts) {
-        if (t >= 0 && t < minValidT) {
-            minValidT = t;
-        }
-    }
-
-    paddlePos += paddleVelocity * minValidT;
-
-    return true;
+    return !checkLeft && !checkRight && !checkTop && !checkBottom;
 }
