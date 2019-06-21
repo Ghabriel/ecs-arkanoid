@@ -10,22 +10,6 @@
 #include "../systems/movement-system/include.hpp"
 #include "../systems/rendering-system/include.hpp"
 
-template<typename T>
-void useToggleComponentEffect(
-    state::State& state,
-    ecs::World& world,
-    ecs::Entity entity,
-    const T& component
-) {
-    state.useEffect([&world, entity, &component] {
-        world.addComponent(entity, component);
-
-        return [&world, entity] {
-            world.removeComponent<T>(entity);
-        };
-    });
-}
-
 template<typename F, typename... Args>
 auto make_forwarder(F fn, Args&&... fixedArgs) {
     return [&, fn](auto&&... extraArgs) {
@@ -36,7 +20,7 @@ auto make_forwarder(F fn, Args&&... fixedArgs) {
     };
 }
 
-class RunningState : public state::State {
+class RunningState : public state::EffectState {
  public:
     RunningState(
         ecs::World& world,
@@ -76,7 +60,6 @@ class RunningState : public state::State {
         auto callback = make_forwarder(usePaddleCollisionHandlerSystem, world);
 
         useToggleComponentEffect(
-            *this,
             world,
             collisionListenerId,
             BallPaddleCollisionListener { callback }
@@ -87,7 +70,6 @@ class RunningState : public state::State {
         auto callback = make_forwarder(useBounceCollisionHandlerSystem, world);
 
         useToggleComponentEffect(
-            *this,
             world,
             collisionListenerId,
             BallObjectsCollisionListener { callback }
@@ -101,7 +83,6 @@ class RunningState : public state::State {
         };
 
         useToggleComponentEffect(
-            *this,
             world,
             collisionListenerId,
             GameOverListener { callback }

@@ -8,7 +8,7 @@
 #include "../systems/movement-system/include.hpp"
 #include "../systems/rendering-system/include.hpp"
 
-class WaitingState : public state::State {
+class WaitingState : public state::EffectState {
  public:
     WaitingState(
         ecs::World& world,
