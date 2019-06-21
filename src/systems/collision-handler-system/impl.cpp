@@ -1,8 +1,8 @@
 #include "include.hpp"
 
 #include <bitset>
-#include <random>
 #include "../../constants.hpp"
+#include "../../engine/misc/check-percentage.hpp"
 #include "../../helpers/aggregate-data.hpp"
 #include "../../helpers/ball-paddle-contact.hpp"
 
@@ -10,7 +10,6 @@
 
 static bool handleBounceCollision(ecs::World&, ecs::Entity, ecs::Entity);
 static bool handleBallBrickCollision(ecs::World&, ecs::Entity, ecs::Entity);
-bool checkPercentage(int percentage);
 
 void useBallPaddleCollisionSystem(ecs::World& world, ecs::Entity ballId, ecs::Entity paddleId) {
     std::cout << "Collision detected with Paddle\n";
@@ -117,7 +116,7 @@ bool handleBallBrickCollision(
         return true;
     }
 
-    if (checkPercentage(50)) {
+    if (misc::checkPercentage(50)) {
         using constants::POWERUP_RADIUS;
         using constants::POWERUP_VELOCITY;
 
@@ -135,12 +134,4 @@ bool handleBallBrickCollision(
 
     world.deleteEntity(brickId);
     return false;
-}
-
-bool checkPercentage(int percentage) {
-    static std::random_device randomDevice;
-    static std::mt19937 gen(randomDevice());
-    static std::uniform_int_distribution<> distribution(1, 100);
-
-    return distribution(gen) <= percentage;
 }
