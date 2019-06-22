@@ -73,6 +73,7 @@ void useCollisionSystem<Paddle, PowerUp>(
 ) {
     for (ecs::Entity powerUpId : powerUpIds) {
         std::cout << "Collision detected between Paddle and PowerUp " << powerUpId << "\n";
+        world.deleteEntity(powerUpId);
 
         world.findAll<Ball>()
             .forEach([&world](ecs::Entity ballId) {
