@@ -1,38 +1,53 @@
-# Pong - ECS
+# Arkanoid - ECS
 
-A simple implementation of Pong using the ECS architectural pattern, C++17 and SFML.
+A simple implementation of Arkanoid using the ECS architectural pattern, C++17 and SFML.
 
 ## Components
 
-| Component         | Description |
-|-------------------|-------------|
-| CircularObject    | radius of round objects (e.g the ball) |
-| Drawable          | tag component that indicates that the entity should be rendered |
-| Input             | tag component that indicates that the entity interacts with the keyboard |
-| Position          | center of mass of the entity |
-| RectangularObject | width and height of rectangular objects (e.g the paddles) |
-| Scoreboard        | scores of both players |
-| ScoreListener     | contains a function that is called whenever a player scores |
-| ScoringBounds     | the x coordinates of the scoring thresholds |
-| Velocity          | velocity of the entity |
-| Wall              | a line segment corresponding to a window wall and a corresponding normal vector |
+| Component                          | Description |
+|------------------------------------|-------------|
+| Ball                               | tag component: entity is a ball |
+| Brick                              | tag component: entity is a brick |
+| Circle                             | radius of round objects |
+| CollisionListener<Ball, Brick>     | contains a function that is called whenever a ball and a brick collide |
+| CollisionListener<Ball, Paddle>    | contains a function that is called whenever a ball and a paddle collide |
+| CollisionListener<Ball, Wall>      | contains a function that is called whenever a ball and a wall collide |
+| CollisionListener<Paddle, PowerUp> | contains a function that is called whenever a paddle and a powerup collide |
+| CollisionListener<Paddle, Wall>    | contains a function that is called whenever a paddle and a wall collide |
+| GameOverListener                   | contains a function that is called whenever the player loses |
+| Input                              | tag component: entity reacts to input |
+| Link                               | links the position of an entity to another entity |
+| Paddle                             | tag component: entity is a paddle |
+| PiercingBall                       | tag component: ball has the Piercing Ball powerup |
+| Position                           | location of the center of mass of the entity |
+| PowerUp                            | tag component: entity is a powerup |
+| Rectangle                          | width and height of rectangular objects |
+| Style                              | fill color and border color/thickness |
+| TimedEvent                         | contains a function that is called at a specific timestamp |
+| Velocity                           | velocity of the entity |
+| Visible                            | tag component: entity should be rendered |
+| Wall                               | tag component: entity is a wall |
 
 ## Entities
 
-| Entity        | Components |
-|---------------|------------|
-| Ball          | CircularObject, Drawable, Position, ScoreListener, ScoringBounds, Velocity |
-| Player Paddle | Drawable, Input, Position, RectangularObject |
-| Bot Paddle    | Drawable, Position, RectangularObject |
-| Scoreboard    | Drawable, Scoreboard, ScoreListener, Position |
-| Wall          | Wall |
+| Entity   | Components |
+|----------|------------|
+| Ball     | Ball, Circle, Position, Style, Visible |
+| Brick    | Brick, Position, Rectangle, Style, Visible |
+| Paddle   | Input, Paddle, Position, Rectangle, Style, Visible |
+| Power-Up | Circle, Position, PowerUp, Style, Velocity, Visible |
+| Wall     | Position, Rectangle, Style, Visible, Wall |
 
 ## Systems
 
-| System          | Query | Interactions |
-|-----------------|-------|--------------|
-| Input           | Input | Velocity |
-| Movement        | Velocity, Position, CircularObject<br>Velocity, Position, RectangularObject | Wall, RectangularObject<br>- |
-| Paddle Bounding | Position, RectangularObject |  |
-| Rendering       | Drawable, Position, CircularObject<br>Drawable, Position, RectangularObject<br>Drawable, Position, Scoreboard |  |
-| Scoring         | ScoringBounds, Position | ScoreListener |
+| System            | Query | Interactions |
+|-------------------|-------|--------------|
+| Collision Handler | | Circle, PiercingBall, Position, PowerUp, Rectangle, Style, TimedEvent, Velocity, Visible |
+| Collision         | Ball, Brick, Circle, Paddle, Position, PowerUp, Rectangle, Velocity, Wall | CollisionListener<Ball, Brick>, CollisionListener<Ball, Paddle>, CollisionListener<Ball, Wall>, CollisionListener<Paddle, PowerUp>, CollisionListener<Paddle, Wall> |
+| Game Over         | Ball, Position | GameOverListener |
+| Input             | Input | Velocity |
+| Launching         | Ball, Paddle, Position | Velocity |
+| Level Loading     | | Ball, Brick, Circle, Input, Paddle, Position, Rectangle, Style, Visible, Wall |
+| Movement          | Position, Velocity | |
+| Rendering         | Circle, Position, Rectangle, Style, Visible | |
+| Timing            | TimedEvent | |
