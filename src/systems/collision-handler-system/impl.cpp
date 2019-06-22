@@ -76,7 +76,19 @@ void useCollisionSystem<Paddle, PowerUp>(
 
         world.findAll<Ball>()
             .forEach([&world](ecs::Entity ballId) {
+                if (world.hasComponent<PiercingBall>(ballId)) {
+                    return;
+                }
+
                 std::cout << "Ball is now in piercing mode.\n";
+
+                auto expirationFn = [&world, ballId] {
+                    std::cout << "Piercing mode expired.\n";
+                    world.removeComponent<PiercingBall>(ballId);
+                };
+
+                world.createEntity(createEvent(3000, expirationFn));
+
                 world.addComponent(ballId, PiercingBall { });
             });
     }

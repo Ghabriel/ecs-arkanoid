@@ -9,6 +9,7 @@
 #include "../components/Rectangle.hpp"
 #include "../components/Style.hpp"
 #include "../components/Tags.hpp"
+#include "../components/TimedEvent.hpp"
 #include "../components/Velocity.hpp"
 #include "../engine/ecs/include.hpp"
 
@@ -32,6 +33,7 @@ namespace ecs {
         PowerUp,
         Rectangle,
         Style,
+        TimedEvent,
         Velocity,
         Visible,
         Wall

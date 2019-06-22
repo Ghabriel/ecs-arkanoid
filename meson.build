@@ -13,6 +13,7 @@ src = [
 	'src/systems/level-loading-system/impl.cpp',
 	'src/systems/movement-system/impl.cpp',
 	'src/systems/rendering-system/impl.cpp',
+	'src/systems/timing-system/impl.cpp',
 	'src/main.cpp',
 ]
 

@@ -9,6 +9,7 @@
 #include "../systems/launching-system/include.hpp"
 #include "../systems/movement-system/include.hpp"
 #include "../systems/rendering-system/include.hpp"
+#include "../systems/timing-system/include.hpp"
 
 template<typename F, typename... Args>
 auto partialApply(F fn, Args&&... fixedArgs) {
@@ -43,6 +44,7 @@ class RunningState : public state::EffectState {
         useInputSystem(world);
         useCollisionSystem(world, normalizedElapsedTime);
         useMovementSystem(world, normalizedElapsedTime);
+        useTimingSystem(world);
         useGameOverSystem(world);
     }
 
