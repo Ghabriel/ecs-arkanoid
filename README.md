@@ -5,13 +5,13 @@ This document aims to explain the core ideas behind the ECS Framework used, prov
 ## Game class
 
 The project has a `Game` class, which acts as a facade to the underlying game logic. It contains two private properties:
- * `ecs::World world` - a data structure containing all game entities, including their components (more details below);
+ * `ecs::World world` - a data structure containing all game entities, including their components (more details [below](#world-class));
 * `StateMachine stateMachine` - a generic state machine that controls the state transitions within the game.
 
 The following three methods are provided and recommended for any game:
- * `void init()` - registers the game state instances to the state machine, and pushes the initial state. Additional arguments may be supplied. For example, ecs-arkanoid receives the size of the window and implements `init` as follows:
+ * `void init()` - registers the game state instances to the state machine, and pushes the initial state. Additional arguments may be supplied. For example, ecs-arkanoid implements `init` as follows:
     ```cpp
-    void init(float width, float height) {
+    void init() {
         stateMachine.registerState("waiting", std::make_unique<WaitingState>(world, stateMachine));
         stateMachine.registerState("running", std::make_unique<RunningState>(world, stateMachine));
         stateMachine.pushState("waiting");
@@ -74,7 +74,7 @@ Note that the constructor can safely take `World` and `StateMachine` by referenc
 
 `WaitingState` simply waits for the player to press the spacebar and, when they do, changes the current state to `"running"`. The state machine maps names to state instances, decoupling the state classes. It's up to `Game`, inside `init()`, to dictate which names map to which instances.
 
-The `render` method of `WaitingState` calls a **system**, a core idea of the ECS architecture. Systems are arbitrary functions, conventionally prefixed by `use`, which take the `world` as parameter (and possibly other things). A system is usually a free function with its own files (inside `src/systems/` in the conventional file structure, explained below), facilitating its reuse by multiple states.
+The `render` method of `WaitingState` calls a **system**, a core idea of the ECS architecture. Systems are arbitrary functions, conventionally prefixed by `use`, which take the `world` as parameter (and possibly other things). A system is usually a free function with its own files (inside `src/systems/` in the conventional file structure, explained [below](#conventional-file-structure)), facilitating its reuse by multiple states.
 
 ### onEnter and onExit
 
@@ -253,3 +253,62 @@ void useTimingSystem(ecs::World& world) {
 ```
 
 **Tip:** both `.forEach()` and `.mutatingForEach()` perform better if the _least_ common component is the _first_ to be filtered.
+
+## Conventional file structure
+
+The source code of the project is typically organized as follows.
+```
+src
+├── components - a folder containing all the game components.
+│   ├── Circle.hpp
+│   ├── Rectangle.hpp
+│   ├── Tags.hpp
+│   ├── TimedEvent.hpp
+│   └── Velocity.hpp
+├── constants.hpp - global constants required by the game, like window size, typically inside a `constants` namespace.
+├── engine - the framework library folder. Usually doesn't need to be changed.
+│   ├── ecs - files related to ECS storage and manipulation
+│   │   ├── DataQuery.hpp
+│   │   ├── ECS.hpp
+│   │   ├── include.hpp - helper file to include all other ECS-related files.
+│   │   └── World.hpp
+│   ├── metaprogramming - metaprogramming utilities.
+│   │   ├── for-each-type.hpp
+│   │   └── lambda-argument-types.hpp
+│   ├── misc - general purpose utilities
+│   │   └── check-percentage.hpp
+│   └── state-management - files related to states.
+│       ├── EffectState.hpp
+│       ├── include.hpp - helper file to include all other state-related files.
+│       ├── NullState.hpp
+│       ├── State.hpp
+│       └── StateMachine.hpp
+├── engine-glue - described at "World class" section.
+│   └── ecs.hpp
+├── Game.hpp - the Game class
+├── main.cpp - the main function
+├── states - a folder containing all the game states.
+│   ├── RunningState.hpp
+│   └── WaitingState.hpp
+└── systems - a folder containing all the game systems, one sub-folder for each.
+    ├── input-system
+    │   ├── impl.cpp
+    │   └── include.hpp
+    ├── launching-system
+    │   ├── impl.cpp
+    │   └── include.hpp
+    ├── level-loading-system
+    │   ├── impl.cpp
+    │   └── include.hpp
+    ├── movement-system
+    │   ├── impl.cpp
+    │   └── include.hpp
+    ├── rendering-system
+    │   ├── impl.cpp
+    │   └── include.hpp
+    └── timing-system
+        ├── impl.cpp
+        └── include.hpp
+```
+
+Helper functions and other files can be organized into other folders, as needed.
